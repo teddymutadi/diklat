@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flipbook dengan Back Cover</title>
+<style>
+  body {
+    margin: 0;
+    background: url('flowers.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh; /* stabil di Android */
+  }
+  .book {
+    width: 90%;           
+    max-width: 550px;     
+    aspect-ratio: 3/5;    
+    position: relative;
+    perspective: 2000px;
+    margin-left: 0.3cm;   
+  }
+  .page {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-origin: left center;
+    transition: transform 1s ease-in-out;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    background: #F5F5F5;
+    overflow: auto;       
+    border-radius: 6px;
+  }
+  .page-content {
+    padding: 20px;
+    font-size: 16px;
+  }
+  /* cover depan */
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+  }
+  /* back cover */
+  .back-cover {
+    background: lightblue;
+  }
+</style>
+</head>
+<body>
+<div class="book" id="book">
+  <!-- Halaman isi -->
+  <div class="page" data-page="1">
+    <div class="page-content">
+      <h2><Font Color="orange">1. Pengertian Mawaris</font></h2>
+      <p>Mawaris adalah hukum Islam yang mengatur pembagian harta peninggalan seseorang 
+setelah meninggal dunia. Istilah ini berasal dari bahasa Arab al-mirats yang berarti warisan 
+atau pusaka. Dalam Islam, kedudukan mawaris sangat penting karena langsung dijelaskan Allah Swt. 
+dalam Al-Qur’an, khususnya Surah An-Nisa, guna menegakkan keadilan, menghindari pertengkaran, 
+dan menjamin setiap ahli waris memperoleh haknya secara layak dan proporsional.</p>
+    </div>
+  </div>
+  <div class="page" data-page="2">
+    <div class="page-content">
+      <h2><font color="Orange">2. Dasar Hukum Mawaris</font></h2>
+      <p>Dasar hukum mawaris bersumber dari Al-Qur’an, Hadis, dan ijma’ ulama. Surah An-Nisa ayat 11, 12,
+ dan 176 menjelaskan bagian ahli waris secara rinci, mencakup hak anak laki-laki, anak perempuan, suami, istri, 
+orang tua, serta saudara. Rasulullah saw. juga menegaskan pentingnya pemberian hak sesuai ketentuan Allah, 
+sementara para ulama melengkapi melalui ijma’ untuk masalah yang tidak disebutkan langsung dalam nash.</p>
+    </div>
+  </div>
+  <div class="page" data-page="3">
+    <div class="page-content">
+      <h2><font color="orange">3. Prinsip-Prinsip dalam Mawaris</font></h2>
+      <p>Dalam hukum mawaris, terdapat beberapa prinsip yang harus diperhatikan, seperti asas
+ ijbari (berlaku secara otomatis setelah pewaris meninggal), asas keadilan, asas bilateral 
+(hak waris bisa berasal dari garis ayah maupun ibu), dan asas individual 
+(setiap ahli waris menerima bagiannya sendiri). Prinsip-prinsip ini menunjukkan bahwa mawaris 
+tidak hanya membagi harta secara matematis, tetapi juga menjaga keseimbangan sosial dan keadilan dalam keluarga.</p>
+    </div>
+  </div>
+  <div class="page" data-page="4">
+    <div class="page-content">
+      <h2><font color="orange">4. Diskusi</font></h2>
+      <p>Seorang ayah meninggal dunia meninggalkan harta warisan berupa rumah 
+     dan sebidang tanah. Ia meninggalkan seorang istri, dua anak laki-laki, dan satu anak perempuan. 
+     Bagaimanakah pembagian harta tersebut menurut hukum mawaris Islam?</p>
+    </div>
+  </div>
+  <!-- Back cover -->
+  <div class="page back-cover" data-page="5"></div>
+
+  <!-- Cover depan (paling depan) -->
+  <div class="page cover" data-page="0">
+    <img src="https://www.geocities.ws/diklat/bookflip/sampul.png" alt="Cover Buku">
+  </div>
+</div>
+
+<script>
+  const pages = document.querySelectorAll(".page");
+  let zIndexCounter = 1;
+
+  pages.forEach((page, index) => {
+    // cover depan selalu paling tinggi
+    if (page.classList.contains("cover")) {
+      page.style.zIndex = pages.length + 10;
+    } else {
+      page.style.zIndex = pages.length - index;
+    }
+
+    page.addEventListener("click", () => {
+      if (!page.classList.contains("flipped")) {
+        page.style.transform = "rotateY(-180deg)";
+        page.classList.add("flipped");
+        page.style.zIndex = ++zIndexCounter;
+      } else {
+        page.style.transform = "rotateY(0deg)";
+        page.classList.remove("flipped");
+        page.style.zIndex = ++zIndexCounter;
+      }
+    });
+  });
+</script>
+</body>
+</html>
