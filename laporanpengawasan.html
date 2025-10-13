@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Form Input Data</title>
+  <style>
+    /* Latar layar hijau tua */
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: Arial, sans-serif;
+      background-color: #0b5a3a; /* hijau tua */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* Kontainer form */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:12px;
+      padding:24px;
+      width:420px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      color: #033826;
+    }
+
+    h2 { margin-top:0; color:#fff; text-align:center; }
+
+    label{
+      display:block;
+      margin:12px 0 6px 0;
+      color:#eaf7ee;
+      font-weight:600;
+    }
+
+    /* Input skin hijau muda */
+    input[type="text"], textarea {
+      width:100%;
+      box-sizing:border-box;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.08);
+      background-color: #d6f5de; /* hijau muda */
+      font-size:14px;
+      outline:none;
+      resize:vertical;
+      min-height:40px;
+    }
+
+    /* Textarea putih bersih tanpa tulisan (no placeholder) */
+    textarea{
+      background-color: #ffffff; /* putih bersih */
+      color:#000;
+      min-height:110px;
+    }
+
+    /* Tombol Kirim */
+    .btn{
+      display:inline-block;
+      margin-top:14px;
+      padding:10px 18px;
+      border-radius:10px;
+      border:none;
+      font-weight:700;
+      cursor:pointer;
+      background-color:#2e8b57; /* tombol hijau sedang */
+      color:#fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+
+    .btn:disabled{
+      opacity:0.6;
+      cursor:default;
+    }
+
+    /* Pesan status */
+    .status{
+      margin-top:12px;
+      padding:10px;
+      border-radius:8px;
+      display:none;
+      font-weight:600;
+    }
+    .status.success{
+      background-color:#e6f8ee;
+      color:#0b6f44;
+      border:1px solid #c7f0d8;
+    }
+    .status.error{
+      background-color:#ffecec;
+      color:#842121;
+      border:1px solid #f5c6c6;
+    }
+
+    /* Footer kecil */
+    .small {
+      margin-top:10px;
+      font-size:12px;
+      color:#d6f7e5;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Form Input Data</h2>
+
+    <label for="nama">Nama</label>
+    <input type="text" id="nama" name="nama" autocomplete="name" />
+
+    <label for="alamat">Alamat</label>
+    <!-- textarea berwarna putih bersih tanpa tulisan -->
+    <textarea id="alamat" name="alamat"></textarea>
+
+    <div style="text-align:right;">
+      <button id="submitBtn" class="btn">Kirim</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="small">Data akan dikirim langsung ke Google Spreadsheet.</div>
+  </div>
+
+  <script>
+    // -- Ganti URL_SCRIPT dengan URL Web App Apps Script Anda setelah deploy --
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbw51jZGlNYnFnjlaV22kBoE1DgkpMwqpYs9niPWMbSPV-zZaJgn02nGu4Qp82l50YStZw/exec";
+
+    const namaEl = document.getElementById('nama');
+    const alamatEl = document.getElementById('alamat');
+    const statusEl = document.getElementById('status');
+    const btn = document.getElementById('submitBtn');
+
+    function showStatus(message, type='success') {
+      statusEl.textContent = message;
+      statusEl.className = 'status ' + (type==='success' ? 'success' : 'error');
+      statusEl.style.display = 'block';
+    }
+
+    function clearStatus() {
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+      statusEl.className = 'status';
+    }
+
+    async function kirimData() {
+      clearStatus();
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
+
+      // ambil nilai
+      const data = {
+        nama: namaEl.value.trim(),
+        alamat: alamatEl.value.trim()
+      };
+
+      // validasi sederhana (boleh diperluas)
+      if (!data.nama) {
+        showStatus('Nama harus diisi.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Kirim';
+        return;
+      }
+
+      try {
+        const form = new FormData();
+        form.append('nama', data.nama);
+        form.append('alamat', data.alamat);
+
+        const res = await fetch(URL_SCRIPT, {
+          method: 'POST',
+          body: form,
+        });
+
+        // harapkan JSON balasan dari Apps Script
+        const text = await res.text();
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch(e) {
+          // jika bukan JSON, gunakan text
+          result = { status: 'error', message: text || 'Respons tidak dikenali dari server.' };
+        }
+
+        if (res.ok && result.status === 'success') {
+          showStatus('Data sudah terkirim ke Spreadsheet', 'success');
+          // setelah terkirim, textarea kembali bersih tanpa tulisan
+          alamatEl.value = '';
+          // optional: tetap biarkan nama, atau kosongkan juga. Permintaan hanya menyebut textarea.
+        } else {
+          showStatus(result.message || 'Gagal mengirim data.', 'error');
+        }
+
+      } catch (err) {
+        showStatus('Terjadi kesalahan jaringan: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Kirim';
+      }
+    }
+
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      kirimData();
+    });
+
+    // tekan Enter saat fokus di input nama -> kirim
+    namaEl.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        kirimData();
+      }
+    });
+  </script>
+</body>
+</html>
