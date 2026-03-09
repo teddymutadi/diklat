@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papan Harapan & Komitmen</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .card-enter {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        /* Custom scrollbar for cards with lots of text */
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Papan Harapan & Komitmen</h1>
+                    <p class="text-sm text-gray-500">Bagikan aspirasi dan komitmen Anda di sini</p>
+                </div>
+            </div>
+            <button onclick="clearAllData()" class="text-xs text-red-500 hover:text-red-700 underline hidden md:block">
+                Hapus Semua Data
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Board -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="bg-white p-6 rounded-full shadow-sm mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Belum ada postingan</h3>
+            <p class="text-gray-500 mt-1">Jadilah yang pertama menulis harapan dan komitmen!</p>
+        </div>
+
+        <!-- Grid Container (Masonry Layout) -->
+        <div id="card-grid" class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6 mx-auto">
+            <!-- Cards will be injected here via JS -->
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button onclick="openModal()" class="fixed bottom-8 right-8 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 z-20 group">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <span class="absolute right-full mr-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap top-1/2 -translate-y-1/2">
+            Tambah Postingan
+        </span>
+    </button>
+
+    <!-- Modal Form -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-[popIn_0.2s_ease-out]">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h2 class="text-lg font-bold text-gray-800">Buat Postingan Baru</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body (Form) -->
+            <div class="p-6 overflow-y-auto custom-scroll">
+                <form id="data-form" class="space-y-6">
+                    
+                    <!-- Section: Identitas -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">Identitas Diri</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                <input type="text" name="nama" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Nama Anda">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Instansi</label>
+                                <input type="text" name="instansi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Asal Instansi">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp</label>
+                                <input type="tel" name="wa" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="08xxxxxxxxxx">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                                <input type="text" name="alamat" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Kota/Kabupaten">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-4 space-y-4">
+                        <h3 class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">Refleksi & Komitmen</h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harapan</label>
+                            <textarea name="harapan" rows="2" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Apa harapan Anda?"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kecemasan</label>
+                            <textarea name="kecemasan" rows="2" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Apa yang Anda cemaskan?"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Norma</label>
+                            <textarea name="norma" rows="2" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Norma yang dipegang?"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Komitmen</label>
+                            <textarea name="komitmen" rows="2" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Komitmen Anda ke depan?"></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <button onclick="closeModal()" type="button" class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                    Batal
+                </button>
+                <button onclick="submitForm()" type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition-colors flex items-center gap-2">
+                    <span>Terbitkan</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Store Data Structure
+        let posts = JSON.parse(localStorage.getItem('padletData')) || [];
+
+        // DOM Elements
+        const grid = document.getElementById('card-grid');
+        const emptyState = document.getElementById('empty-state');
+        const modal = document.getElementById('modal-overlay');
+        const form = document.getElementById('data-form');
+
+        // Initialize
+        renderPosts();
+
+        // Functions
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+            form.reset();
+        }
+
+        // Close modal if clicking outside the modal content
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        function submitForm() {
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const formData = new FormData(form);
+            const newPost = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                color: getRandomColor(),
+                nama: formData.get('nama'),
+                instansi: formData.get('instansi'),
+                wa: formData.get('wa'),
+                alamat: formData.get('alamat'),
+                harapan: formData.get('harapan'),
+                kecemasan: formData.get('kecemasan'),
+                norma: formData.get('norma'),
+                komitmen: formData.get('komitmen')
+            };
+
+            posts.unshift(newPost); // Add to beginning
+            saveData();
+            renderPosts();
+            closeModal();
+        }
+
+        function saveData() {
+            localStorage.setItem('padletData', JSON.stringify(posts));
+        }
+
+        function clearAllData() {
+            if(confirm('Apakah Anda yakin ingin menghapus semua data?')) {
+                posts = [];
+                saveData();
+                renderPosts();
+            }
+        }
+
+        function deletePost(id) {
+            if(confirm('Hapus postingan ini?')) {
+                posts = posts.filter(post => post.id !== id);
+                saveData();
+                renderPosts();
+            }
+        }
+
+        function getRandomColor() {
+            const colors = [
+                'bg-yellow-100 border-yellow-200',
+                'bg-blue-100 border-blue-200',
+                'bg-green-100 border-green-200',
+                'bg-pink-100 border-pink-200',
+                'bg-purple-100 border-purple-200',
+                'bg-orange-100 border-orange-200'
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function renderPosts() {
+            grid.innerHTML = '';
+            
+            if (posts.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+            }
+
+            posts.forEach(post => {
+                const card = document.createElement('div');
+                card.className = `break-inside-avoid rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border card-enter flex flex-col gap-3 ${post.color} relative group mb-6`;
+                
+                card.innerHTML = `
+                    <button onclick="deletePost(${post.id})" class="absolute top-2 right-2 p-1 bg-white/50 rounded-full text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    <div class="border-b border-black/10 pb-2">
+                        <h3 class="font-bold text-gray-800 text-lg leading-tight break-words">${escapeHtml(post.nama)}</h3>
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mt-1 break-words">${escapeHtml(post.instansi)}</p>
+                        <div class="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span class="truncate max-w-[150px]" title="${escapeHtml(post.alamat)}">${escapeHtml(post.alamat)}</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <div>
+                            <span class="font-semibold text-xs text-indigo-600 uppercase">Harapan:</span>
+                            <p class="leading-snug break-words">${escapeHtml(post.harapan)}</p>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-xs text-rose-600 uppercase">Kecemasan:</span>
+                            <p class="leading-snug break-words">${escapeHtml(post.kecemasan)}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-black/5">
+                            <div class="relative group/tooltip">
+                                <span class="font-semibold text-xs text-emerald-600 uppercase block mb-1">Norma:</span>
+                                <p class="text-xs leading-snug line-clamp-2 cursor-help">${escapeHtml(post.norma)}</p>
+                                <div class="absolute left-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-gray-800 text-white text-xs p-2 rounded shadow-lg z-20 w-48 break-words pointer-events-none">
+                                    ${escapeHtml(post.norma)}
+                                </div>
+                            </div>
+                            <div class="relative group/tooltip">
+                                <span class="font-semibold text-xs text-blue-600 uppercase block mb-1">Komitmen:</span>
+                                <p class="text-xs leading-snug line-clamp-2 cursor-help">${escapeHtml(post.komitmen)}</p>
+                                <div class="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-gray-800 text-white text-xs p-2 rounded shadow-lg z-20 w-48 break-words pointer-events-none">
+                                    ${escapeHtml(post.komitmen)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 mt-auto flex justify-between items-center text-xs text-gray-400 border-t border-black/5">
+                        <span>${post.timestamp}</span>
+                        <a href="tel:${post.wa}" class="font-mono text-indigo-500 hover:text-indigo-700 hover:underline flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                            ${escapeHtml(post.wa)}
+                        </a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Security helper to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
