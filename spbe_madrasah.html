@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>👨‍🏫 GAS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+
+<style>
+
+/* ================= RESET ================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* ================= BODY ================= */
+
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    background:
+    linear-gradient(
+    135deg,
+    #4b0f1c,
+    #7b2336,
+    #ffffff);
+
+    height:100vh;
+
+    overflow:hidden;
+
+    color:white;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+    background: #650b1c;
+    text-align: center;
+    color: white;
+    padding: 15px 20px; /* kecilkan padding */
+    line-height: 1.1;
+    margin: 0;
+}
+
+.judul-1{
+     font-family: "Cinzel", serif;
+    font-size: 35px;
+    font-weight: bold;
+    margin-top: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+.judul-2{
+    font-family: "Calibri", serif;
+    font-size: 18px;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+/* ================= MENU TEXT ================= */
+
+.drawer-tab{
+
+    position:fixed;
+
+    left:8px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    color:white;
+
+    cursor:pointer;
+
+    z-index:3000;
+
+    writing-mode:vertical-rl;
+
+    text-orientation:mixed;
+
+    font-weight:700;
+
+    letter-spacing:3px;
+
+    font-size:18px;
+
+    transition:0.3s;
+
+    user-select:none;
+
+    text-shadow:
+    2px 2px 8px rgba(0,0,0,0.5);
+}
+
+.drawer-tab:hover{
+
+    transform:
+    translateY(-50%)
+    translateX(4px);
+
+    color:#ffd6de;
+}
+
+/* ================= DRAWER ================= */
+
+.drawer{
+
+    width:320px;
+
+    height:100vh;
+
+    background:#4b0f1c;
+
+    position:fixed;
+
+    top:0;
+
+    left:-330px;
+
+    z-index:2000;
+
+    transition:0.5s ease;
+
+    box-shadow:5px 0 20px rgba(0,0,0,0.4);
+
+    padding-top:90px;
+
+    overflow-y:auto;
+
+    scrollbar-width:none;
+}
+
+/* HIDE SCROLLBAR */
+
+.drawer::-webkit-scrollbar{
+
+    display:none;
+}
+
+.drawer.active{
+
+    left:0;
+
+    padding-left:45px;
+}
+
+/* ================= MENU BUTTON ================= */
+
+.menu{
+
+    padding:10px;
+}
+
+.menu button{
+
+    width:100%;
+
+    padding:16px;
+
+    margin-bottom:12px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#7b2336;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:500;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.menu button:hover{
+
+    background:#a83a52;
+
+    transform:translateX(5px);
+}
+
+/* ================= MAIN ================= */
+
+.main{
+
+    width:100%;
+
+    height:85vh;
+
+    padding-top: 0px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+}
+
+/* ================= PAGE ================= */
+
+.page{
+
+    width:88%;
+
+    height:78vh;
+
+    background:rgba(255,255,255,0.12);
+
+    border-radius:25px;
+
+    backdrop-filter:blur(12px);
+
+    border:1px solid rgba(255,255,255,0.25);
+
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+
+    padding:35px;
+
+    display:none;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    overflow:hidden;
+
+    position:relative;
+}
+
+.page.active{
+
+    display:flex;
+}
+
+/* ================= CONTENT ================= */
+
+.page h2{
+
+    font-size:38px;
+
+    margin-bottom:20px;
+
+    font-family:'Cinzel',serif;
+}
+
+.page p{
+
+    font-size:17px;
+
+    line-height:1.9;
+
+    text-align:justify;
+
+    color:#f3f3f3;
+}
+
+/* ================= BUTTON AREA ================= */
+
+.button-area{
+
+    width:100%;
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:12px;
+
+    margin-top:25px;
+
+    position:relative;
+
+    z-index:999;
+}
+
+/* ================= BUTTON ================= */
+
+.action-btn{
+
+    padding:12px 20px;
+
+    border-radius:14px;
+
+    text-decoration:none;
+
+    color:white;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:0.3s;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    position:relative;
+
+    z-index:9999;
+
+    pointer-events:auto;
+}
+
+.action-btn:hover{
+
+    transform:translateY(-3px);
+
+    opacity:0.9;
+}
+
+/* ================= BUTTON COLORS ================= */
+
+.btn-prompt{
+    background:#6f42c1;
+}
+
+.btn-gs{
+    background:#198754;
+}
+
+.btn-html{
+    background:#dc3545;
+}
+
+.btn-app{
+    background:#0d6efd;
+}
+
+.btn-sheet{
+    background:#fd7e14;
+}
+
+.btn-ai{
+    background:#20c997;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:768px){
+
+    .header h1{
+	margin-top:10px;
+
+        font-size:18px;
+
+        padding:0 10px;
+    }
+
+    .page{
+
+        width:94%;
+
+        height:80vh;
+
+        padding:25px;
+    }
+
+    .page h2{
+
+        font-size:28px;
+    }
+
+    .page p{
+
+        font-size:15px;
+    }
+
+    .drawer{
+
+        width:280px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+    <div class="header">
+  <div class="judul-1">
+    MANAJEMEN MADRASAH BERBASIS DIGITAL
+  </div>
+
+  <div class="judul-2">
+   Presented with ❤️ by: Dr. H. Mutadi, S.Pd. M.Ed - WhatsApp: 081227788600 - 082137312000
+  </div>
+</div>
+   
+
+</div>
+
+<!-- ================= MENU ================= -->
+
+<div class="drawer-tab"
+     onclick="toggleDrawer()">
+
+     MENU
+
+</div>
+
+<!-- ================= DRAWER ================= -->
+
+<div class="drawer"
+     id="drawer">
+
+    <div class="menu">
+
+        <button onclick="showPage('page1')">📘 Input No API No CRUD</button>
+        <button onclick="showPage('page2')">👨‍🏫 Input API No CRUD</button>
+        <button onclick="showPage('page3')">🧠 Input API CRUD</button>
+        <button onclick="showPage('page4')">📋 Portal Guru</button>
+        <button onclick="showPage('page5')">📊 Buku Tamu Digital</button>
+        <button onclick="showPage('page6')">🤖 Portal Guru BK</button>
+	<button onclick="showPage('page7')">📘 Upload SKP</button>
+        <button onclick="showPage('page8')">👨‍🏫 Adm Ekstakurikuler</button>
+        <button onclick="showPage('page9')">🧠 Validasi RPP</button>
+        <button onclick="showPage('page10')">📋 Keuangan Komite</button>
+        <button onclick="showPage('page11')">📊 Dashboard Kamad</button>
+        
+
+    </div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+<!-- ================= PAGE 1 ================= -->
+
+<div class="page active" id="page1">
+
+<div>
+
+<h2>📘 Form Input No API No CRUD</h2>
+
+<p>
+Pengembangan aplikasi berbasis HTML dan code.gs memungkinkan pembuatan 
+sistem input data online secara sederhana tanpa API 
+(Application Programming Interface) maupun CRUD (Create, Read, Update, Delete)
+yang kompleks. HTML berfungsi menyusun tampilan antarmuka, seperti 
+kolom identitas, alamat, serta tombol pengiriman. 
+Di sisi lain, code.gs pada Google Apps Script mengatur proses pengiriman 
+informasi menuju Google Spreadsheet secara otomatis. 
+Perpaduan keduanya cocok digunakan untuk presensi, buku tamu digital, 
+dan pengumpulan tugas. Dengan tampilan menarik serta proses otomatisasi, 
+pengelolaan informasi menjadi lebih cepat, teratur, hemat waktu, 
+dan sesuai kebutuhan administrasi digital masa kini.
+</p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/2atqjbsw"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/tbfigwaj"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/rfcasc32"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbyduKzxcwEgpY8XPKo-xUn-D06pcCgVvrPnPkHPa6IjQN177AB-UwW3XPRsJkJta8eLtQ/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+<a href="https://docs.google.com/spreadsheets/d/1AW2kRT3mOSLXZstaH14ZKN41aDZMU1j1t6tJVtlCCMo/edit?usp=sharing"
+target="_blank"
+class="action-btn btn-sheet">
+
+📊 SPREADSHEET
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 2 ================= -->
+
+<div class="page" id="page2">
+
+<div>
+
+<h2>👨‍🏫 Form Input API No CRUD</h2>
+
+<p>
+Form HTML dapat dihubungkan dengan Google Spreadsheet yang dijadikan API 
+(Application Programming Interface) melalui Google Apps Script code.gs. 
+Dengan cara ini, Spreadsheet berfungsi sebagai backend untuk menerima dan mengelola data 
+dari form tanpa CRUDE (Create, Read, Update, Delete) yang kompleks. 
+Data yang dikirim dari input pengguna akan diproses oleh script lalu 
+langsung disimpan ke baris baru di Spreadsheet. Secara real time ditampilkan sebagai Output html. 
+Pendekatan ini sangat cocok untuk aplikasi sederhana seperti presensi, 
+buku tamu digital, atau pengumpulan data online karena lebih ringan, 
+cepat dibuat, dan tidak memerlukan sistem database tambahan atau konfigurasi server yang rumit.
+</p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/9h5fthm9"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/iae6c24s"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/a35h856f"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbxp0NbdXrxLjhiGcwq6l6WrrYQ1e2ZeIOJlPHPbLj2_-8I3CcvVqNj89BoUX2p9bp54uA/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+<a href="https://docs.google.com/spreadsheets/d/1-cf0TAUBpDWsDGaxHc6f00SeabwNBRZLQt-TT4dWeS4/edit?usp=sharing"
+target="_blank"
+class="action-btn btn-sheet">
+
+📊 SPREADSHEET
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 3 ================= -->
+
+<div class="page" id="page3">
+
+<div>
+
+<h2>🧠 Form Input API ADMIN CRUD</h2>
+
+<p>
+Pembuatan aplikasi form input berbasis HTML memungkinkan pengguna 
+mengirim data secara online dengan mudah. Spreadsheet digunakan sebagai 
+API melalui Google Apps Script code.gs untuk menerima dan mengelola data. 
+Sistem ini juga dilengkapi fitur login admin untuk membatasi akses. 
+Admin memiliki hak melakukan CRUD (Create, Read, Update, Delete).
+Kombinasi ini menghasilkan aplikasi sederhana namun fungsional, cocok untuk 
+presensi, buku tamu digital, dan pengelolaan data yang lebih terstruktur, 
+aman.
+</p>
+<p>Username: admin  | Password: 12345678</p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/67iw3qe8"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/694fish4"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/tdi6rffr"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbzYyrzV5jhguUzv9b0juQBZiGCqTpyCk6Pk2XNdu8QFe1QHUaI-o-bLuT2f2CSxLpY2/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 4 ================= -->
+
+<div class="page" id="page4">
+
+<div>
+
+<h2>📋 Portal Administrasi Guru</h2>
+
+<p>
+Aplikasi administrasi guru dirancang untuk mengelola 
+kebutuhan perangkat pembelajaran seperti RPP, CP dan TP, 
+prota promes, bank soal, media, surat tugas, sertifikat, absensi, 
+serta nilai. Sistem menyediakan fitur input dan output data yang 
+terstruktur sehingga memudahkan pengelolaan dokumen secara digital. 
+Terdapat login admin yang membatasi akses pengguna dan memberikan 
+hak penuh untuk melakukan CRUD (Create, Read, Update, Delete). 
+Melalui dashboard ini, proses pengawasan dapat dilakukan secara efektif, 
+dan transparan dalam satu sistem berbasis web yang terintegrasi serta mudah digunakan.
+</p>
+<p>Username: admin  |  Password: 12345678</p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/getncbxb"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/khydsjs7"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/9a23mti9"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbylTUj0Via-scS-FeLV5F3CGZU-_6WFLs7lSS3nu6XVCoLxAGNb3IUUgYVMuh2CxW5A3g/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+<!-- ================= PAGE 5 ================= -->
+
+<div class="page" id="page5">
+
+<div>
+
+<h2>📊 Buku Tamu Online</h2>
+
+<p>
+Buku tamu ini dilengkapi dengan form input dan output yang real time. 
+Form input digunakan untuk menerima data dari pengguna, 
+seperti nama, alamat, email, nomor telepon, maupun pesan tertentu. 
+Setelah data tersimpan di spreadsheet segera data itu muncul di output.
+Login sebagai admin memiliki hak CRUD dan merubah status. Aplikasi ini 
+dapat diakses lewat HP baik melalui URL maupun QR code. Pengunjung bisa
+melihat banyaknya tamu dan proses yang terjadi melalui summary. Ketika 
+klik ADMIN maka tombol ADMIN berubah menjadi tombol LOGOUT
+</p>
+<p>Username: admin  | Password: 12345678</p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/qpgksqqh"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/knbyyd2x"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/miarpk9y"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbweAsyLUZHDKmM3ZZTrvi39738C1z_ZvkWvypqPPB6QcPLl3EehmgyE8kaioih-uw0/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 6 ================= -->
+
+<div class="page" id="page6">
+
+<div>
+
+<h2>🤖 Portal Guru BK</h2>
+
+<p>
+Login menjadi bagian penting dalam Portal Guru BK. 
+Sistem ini menyimpan berbagai data privasi peserta didik. Portal BK menyediakan beberapa menu 
+utama seperti data siswa dan peta kerawanan, layanan konseling individu,
+home visit, serta buku kasus untuk mencatat berbagai permasalahan siswa. 
+Sistem memiliki dua jenis login, yaitu pengguna dan admin. Admin memiliki 
+hak CRUD (Create, Read, Update, Delete) untuk mengelola seluruh data. 
+Portal BK sangat penting sebagai media penyimpanan data yang aman, rapi, 
+dan mudah diakses.
+</p>
+<p>Username: pengguna  | Password: 12345678 | Username: admin  |  Password: 12345678 </p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/64ksyaee"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/isgmx2at"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ Code.gs
+
+</a>
+
+<a href="https://id.anotepad.com/notes/3wcq9ptf"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 Index.html
+
+</a>
+
+<a href="https://id.anotepad.com/notes/69dwwdr2"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 Style.html
+
+</a>
+
+<a href="https://id.anotepad.com/notes/q9ed4isq"
+target="_blank"
+class="action-btn btn-sheet">
+
+📊 MainScript.html
+
+</a>
+
+<a href="
+https://script.google.com/macros/s/AKfycbz121Zd6rCQ436AEuY-aQVnE9kGw1wxswq0hLQi5PvfEHCOBvPH4uUGLcmp7ec9Nqtr/exec"
+target="_blank"
+class="action-btn btn-sheet">
+
+✈️ APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 7 ================= -->
+
+<div class="page" id="page7">
+
+<div>
+
+<h2>🤖 Upload SKP</h2>
+
+<p>
+Untuk mengetahui guru yang sudah mengupload SKP maka
+kepala madrasah dapat mengontrolnya lewat aplikasi ini. 
+Login bisa dua cara yaitu sebagai admin dn user. Admin
+memiliki hak CRUD dan merubah aksi. Data akan ditampilkan secara 
+real time. Maaf masih ada placeholder: "peserta didik". Tidak
+masalah. nanti bisa diedit di kodingnya. 
+</p>
+<p>Usename: admin  | Password: 12345678 | Username: user | Password: 12345678</p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/mea3sa5b"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/xp9cn2ym"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/c8rxme9r"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbykBWJ8kVUnjIA-YA7vaXMnnroKQk6nfzgoUZfVbuzSl8ZlZ5dgbWF0UgNz9hT5w-MMCA/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 8 ================= -->
+
+<div class="page" id="page8">
+
+<div>
+
+<h2>🤖 Administrasi Ekstrakurikuler</h2>
+
+<p>
+Untuk transparansi dan akuntabilitas pengelolaan dana
+ekstrakurikuler perlu dibuatkan aplikasi. Login dalam 
+aplikasi ini pilih role, lalu masukkan username dan password.
+Login sebagai admin punya hak CRUD. Sementara login 
+sebagai user habya bisa menginput administrasi keuangan saja.
+</p>
+<p>Username: admin | Password: 12345678 | Username: user | Password: 12345678 </p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/87xnckkn"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/q3thc38e"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/36qgy2n6"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbzBJQw-aDLcy0syCGn2TuQcvxNVKgKkNRW-OumzbKmy4orEMHeGrmSNb5oJ5h4ioW2W/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 9 ================= -->
+
+<div class="page" id="page9">
+
+<div>
+
+<h2>🤖 Validasi RPP</h2>
+
+<p>
+Sebagai kepala madarsah perlu mengoreksi RPP buatan guru. Sudah
+tidak eranya lagi, guru mengeprint RPP kemudian ditumpuk di meja kepala.
+Ini era paperless. Cukup RPP lalu upload di aplikasi. Kepala 
+madrasah mengoreksi dan memberikan persetujuan (approval).
+kepala memiliki hak CRUD dan merubah aksi. Aplikasi ini
+merupakan modifikasi aplikasi sejenis. Tidak harus melalui PROMPT
+</p>
+<p>Username: guru | Password: 12345678 | Username: kepala | Password: 12345678 </p>
+
+</div>
+
+<div class="button-area">
+
+<a href="#"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/36qgy2n6"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/87rqnjeh"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbwWOp_KsntARDw_nnPzLoexQYUeBfX-Ii602GajBYN-ZwTwytkjtkUdIVQbQO8djzpB/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 10 ================= -->
+
+<div class="page" id="page10">
+
+<div>
+
+<h2>🤖 Keuangan Komita</h2>
+
+<p>
+Keuangan komite merupakan keuangan yang dihimpun dari wali murid/santri.
+Dalam pengelolaan ini hendaknya transparabel dan akuntabel (dapat dipertanggungjawabkan)
+pada orang tua wali, kepala sekolah, dan seluruh stakeholder terkait.
+Tampa dibuatkan aplikasi yang mendorong transparan maka administrasi
+keuangan ini masih tetap di "grey area". 
+</p>
+<p>Username: admin | Password: 12345678 </p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/8es24p5e"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/n25nnjks"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/fkxgmgcr"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbxr9YKcDWwu6Xs5_n81RYEkt2bqhAIddVUyhAZf_QcmnGp5iWJ0m3jR-mOCjFTiVgF7qg/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================= PAGE 11 ================= -->
+
+<div class="page" id="page10">
+
+<div>
+
+<h2>🤖 Dashboard Kepala Madrasah</h2>
+
+<p>
+Di era digital ini hampir segala sesuatunya dapat dikontrol
+oleh kepala madrasah melalui layar dashbord kompuer yang ada di mejanya. 
+Inilah manajemen di era digital. Sampai-sampai menteri agama
+lewat asta protasnya menekankan SPBE di setiap satker yang ada.
+SPBE adalah Sistem Pemerintahan Berbasis Elektronik. Sekali lagi,
+ini bukan persoalan TIK melainkan mindset yang mau mendorong
+SPBE.  
+</p>
+<p>Username: admin | Password: 12345678 </p>
+
+</div>
+
+<div class="button-area">
+
+<a href="https://id.anotepad.com/notes/hpshqcbi"
+target="_blank"
+class="action-btn btn-prompt">
+
+🧠 PROMPT
+
+</a>
+
+<a href="https://id.anotepad.com/notes/gmrg3d35"
+target="_blank"
+class="action-btn btn-gs">
+
+⚙️ CODE.GS
+
+</a>
+
+<a href="https://id.anotepad.com/notes/q9whm6tb"
+target="_blank"
+class="action-btn btn-html">
+
+🌐 HTML
+
+</a>
+
+<a href="https://script.google.com/macros/s/AKfycbwAClD5rvL6R8ZYQwyTELkhJhejoIuR5nco8oRQ6yDtksP0md3nOl_yIV5bLXkY_LyStg/exec"
+target="_blank"
+class="action-btn btn-app">
+
+🚀 APLIKASI
+
+</a>
+
+</div>
+
+</div>
+
+<! -------- buat halaman di atas line ini ----------- >
+</div>
+
+<script>
+
+/* ================= TOGGLE MENU ================= */
+
+function toggleDrawer(){
+
+    document
+    .getElementById("drawer")
+    .classList
+    .toggle("active");
+}
+
+/* ================= SHOW PAGE ================= */
+
+function showPage(pageId){
+
+    document
+    .querySelectorAll(".page")
+    .forEach(page => {
+
+        page.classList.remove("active");
+    });
+
+    document
+    .getElementById(pageId)
+    .classList.add("active");
+}
+
+</script>
+
+</body>
+</html>
