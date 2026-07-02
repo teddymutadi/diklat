@@ -547,6 +547,8 @@
         <button class="btn primary admin-control" id="addNodeTopBtn">+ Tambah Model</button>
         <button class="btn admin-control" id="clearConnectorsBtn" title="Pilih konektor lalu klik untuk menghapus satu konektor">Hapus Konektor</button>
         <button class="btn danger admin-control" id="deleteSelectedBtn">Hapus Model</button>
+        <button class="btn admin-control" id="saveSheetBtn" title="Simpan workflow ke Google Spreadsheet">Simpan</button>
+        <button class="btn" id="loadSheetBtn" title="Muat workflow terbaru dari Google Spreadsheet">Muat</button>
         <label class="color-control admin-control" title="Pilih konektor lalu ubah warna. Jika tidak ada konektor terpilih, warna ini menjadi warna konektor baru.">
           Warna Konektor
           <input id="connectorColor" type="color" value="#7c8cff" />
@@ -677,6 +679,8 @@
     const addNodeTopBtn = document.getElementById('addNodeTopBtn');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
     const clearConnectorsBtn = document.getElementById('clearConnectorsBtn');
+    const saveSheetBtn = document.getElementById('saveSheetBtn');
+    const loadSheetBtn = document.getElementById('loadSheetBtn');
     const connectorColorInput = document.getElementById('connectorColor');
     const adminToggleBtn = document.getElementById('adminToggleBtn');
     const arrowPath = document.getElementById('arrowPath');
@@ -715,6 +719,9 @@
     let dragState = null;
     let panState = null;
     let nodeCounter = 1;
+    let saveTimer = null;
+    let isApplyingWorkflowData = false;
+    let lastSavedAt = null;
     const MIN_CANVAS_HEIGHT = 1180;
     const MIN_CANVAS_WIDTH = 1800;
     const NODE_HEIGHT_ESTIMATE = 120;
@@ -761,6 +768,122 @@
       return false;
     }
 
+    function hasAppsScriptBridge() {
+      return typeof google !== 'undefined' && google.script && google.script.run;
+    }
+
+    function getWorkflowData() {
+      return {
+        version: 1,
+        nodes: nodes.map(node => ({ ...node })),
+        connectors: connectors.map(conn => ({ ...conn })),
+        connectorColor,
+        nodeCounter,
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function applyWorkflowData(data, options = {}) {
+      if (!data || typeof data !== 'object') return false;
+      isApplyingWorkflowData = true;
+      nodes = Array.isArray(data.nodes) ? data.nodes.map(node => ({ ...node })) : [];
+      connectors = Array.isArray(data.connectors) ? data.connectors.map(conn => ({ ...conn })) : [];
+      connectorColor = data.connectorColor || '#7c8cff';
+      nodeCounter = Number(data.nodeCounter || nodes.length + 1) || 1;
+      selectedId = null;
+      selectedConnectorIndex = null;
+      connectionStart = null;
+      potentialConnectionDrag = null;
+      closeEditModal();
+      applyConnectorColor(connectorColor);
+      render();
+      isApplyingWorkflowData = false;
+      if (!options.silent) showToast('Workflow berhasil dimuat.');
+      return true;
+    }
+
+    function saveToLocalFallback(silent = false) {
+      try {
+        localStorage.setItem('workflow-presentasi-data', JSON.stringify(getWorkflowData()));
+        lastSavedAt = new Date();
+        if (!silent) showToast('Workflow tersimpan di browser ini. Data tidak akan hilang saat refresh.');
+        return true;
+      } catch (error) {
+        if (!silent) showToast('Gagal menyimpan di browser: ' + error.message);
+        return false;
+      }
+    }
+
+    function loadFromLocalFallback(silent = false) {
+      try {
+        const raw = localStorage.getItem('workflow-presentasi-data');
+        if (!raw) return false;
+        const ok = applyWorkflowData(JSON.parse(raw), { silent: true });
+        if (ok && !silent) showToast('Workflow dimuat dari browser lokal.');
+        return ok;
+      } catch (error) {
+        if (!silent) showToast('Gagal memuat lokal: ' + error.message);
+        return false;
+      }
+    }
+
+    function saveToSpreadsheet(options = {}) {
+      if (!options.auto && !requireAdmin('menyimpan workflow')) return;
+      if (isApplyingWorkflowData) return;
+
+      // Selalu simpan ke browser terlebih dahulu agar aman saat dipakai di GitHub Pages/static hosting.
+      // Jadi setelah refresh, hasil edit tetap muncul walaupun tidak memakai Google Apps Script.
+      saveToLocalFallback(true);
+
+      const payload = getWorkflowData();
+      if (!hasAppsScriptBridge()) {
+        if (!options.auto && !options.silent) showToast('Workflow tersimpan di browser ini. Data tidak akan hilang saat refresh.');
+        return;
+      }
+      google.script.run
+        .withSuccessHandler(result => {
+          lastSavedAt = new Date();
+          if (!options.auto && !options.silent) {
+            showToast(result?.message || 'Workflow berhasil disimpan ke Spreadsheet.');
+          }
+        })
+        .withFailureHandler(error => {
+          if (!options.auto && !options.silent) showToast('Gagal menyimpan ke Spreadsheet: ' + error.message);
+        })
+        .saveWorkflow(payload);
+    }
+
+    function scheduleSave() {
+      if (!isAdmin || isApplyingWorkflowData) return;
+
+      // Simpan lokal secara langsung. Ini penting jika user refresh cepat setelah edit.
+      saveToLocalFallback(true);
+
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => saveToSpreadsheet({ auto: true, silent: true }), 900);
+    }
+
+    function loadFromSpreadsheet(options = {}) {
+      if (!hasAppsScriptBridge()) {
+        const loaded = loadFromLocalFallback(Boolean(options.silent));
+        if (!loaded && !options.silent) showToast('Belum ada data lokal. Jalankan via Apps Script untuk memuat dari Spreadsheet.');
+        return;
+      }
+      google.script.run
+        .withSuccessHandler(data => {
+          if (data && data.nodes) {
+            applyWorkflowData(data, { silent: true });
+            if (!options.silent) showToast('Workflow dimuat dari Spreadsheet.');
+          } else if (!options.silent) {
+            showToast('Spreadsheet belum memiliki data workflow.');
+          }
+        })
+        .withFailureHandler(error => {
+          if (!options.silent) showToast('Gagal memuat dari Spreadsheet: ' + error.message);
+        })
+        .loadWorkflow();
+    }
+
     function applyConnectorColor(color) {
       const nextColor = color || '#7c8cff';
       if (selectedConnectorIndex !== null && connectors[selectedConnectorIndex]) {
@@ -771,6 +894,7 @@
       }
       if (connectorColorInput) connectorColorInput.value = nextColor;
       drawConnectors();
+      scheduleSave();
     }
 
     function createArrowMarker(index, color) {
@@ -1168,6 +1292,7 @@
       markConnectionStart();
       drawConnectors();
       showToast(exists ? 'Konektor tersebut sudah ada.' : 'Konektor berhasil dibuat.');
+      if (!exists) scheduleSave();
     }
 
     function cancelConnection(message = 'Mode konektor dibatalkan.') {
@@ -1190,6 +1315,7 @@
       if (connectorColorInput) connectorColorInput.value = connectorColor;
       drawConnectors();
       showToast('Konektor terpilih berhasil dihapus.');
+      scheduleSave();
     }
 
     function addNode(base = {}) {
@@ -1216,6 +1342,7 @@
       openEditModal(id);
       setTimeout(() => window.scrollTo({ top: Math.max(0, node.y - 180), behavior: 'smooth' }), 80);
       showToast('Model baru ditambahkan di area bawah. Silakan edit datanya.');
+      scheduleSave();
     }
 
     function openNodeUrl(id) {
@@ -1275,6 +1402,7 @@
       selectNode(node.id);
       closeEditModal();
       showToast('Edit model berhasil disimpan.');
+      scheduleSave();
     }
 
     function deleteNode(id) {
@@ -1288,9 +1416,10 @@
       if (connectionStart?.id === id) connectionStart = null;
       render();
       showToast('Model dihapus.');
+      scheduleSave();
     }
 
-    function resetDemo() {
+    function resetDemo(silent = false) {
       nodes = demoNodes.map(n => ({ ...n }));
       connectors = demoConnectors.map(c => ({ ...c, color: c.color || connectorColor }));
       selectedId = null;
@@ -1302,7 +1431,7 @@
       closeEditModal();
       render();
       setStatus('');
-      showToast('Demo workflow dikembalikan.');
+      if (!silent) showToast('Demo workflow dikembalikan.');
     }
 
     function fitLayout() {
@@ -1457,11 +1586,14 @@
       if (!dragState) return;
       const el = document.querySelector(`.node[data-id="${dragState.id}"]`);
       el?.classList.remove('dragging');
+      scheduleSave();
       dragState = null;
     });
 
     canvasScroll.addEventListener('pointerdown', startCanvasPan);
 
+    saveSheetBtn.addEventListener('click', () => saveToSpreadsheet());
+    loadSheetBtn.addEventListener('click', () => loadFromSpreadsheet());
     addNodeTopBtn.addEventListener('click', () => addNode());
     clearConnectorsBtn.addEventListener('click', deleteSelectedConnector);
     deleteSelectedBtn.addEventListener('click', () => deleteNode(selectedId));
@@ -1532,9 +1664,14 @@
       }
     });
 
-    resetDemo();
+    if (!loadFromLocalFallback(true)) {
+      resetDemo(true);
+    }
     applyConnectorColor(connectorColor);
     updateAdminUI();
+    if (hasAppsScriptBridge()) {
+      loadFromSpreadsheet({ silent: true });
+    }
   </script>
 </body>
 </html>
