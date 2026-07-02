@@ -1,0 +1,1540 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workflow Model - Presentasi</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --surface: rgba(15, 23, 42, .78);
+      --surface-soft: rgba(30, 41, 59, .82);
+      --surface-emerald: rgba(56, 189, 248, .10);
+      --stroke: rgba(148, 163, 184, .25);
+      --stroke-strong: rgba(125, 211, 252, .38);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #818cf8;
+      --accent-3: #a78bfa;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #fb7185;
+      --shadow: 0 24px 70px rgba(0,0,0,.45);
+      --shadow-soft: 0 14px 34px rgba(56,189,248,.18);
+      --radius: 22px;
+      --connector-color: #7c8cff;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; margin: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 6%, rgba(56,189,248,.20), transparent 27%),
+        radial-gradient(circle at 92% 3%, rgba(167,139,250,.18), transparent 28%),
+        radial-gradient(circle at 52% 92%, rgba(20,184,166,.10), transparent 30%),
+        linear-gradient(135deg, #020617 0%, #0f172a 48%, #111827 100%);
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto minmax(1180px, 1fr);
+      gap: 16px;
+      padding: 18px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      background: rgba(15,23,42,.72);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      box-shadow: 0 12px 34px rgba(56,189,248,.28);
+    }
+
+    .logo svg { width: 24px; height: 24px; }
+    h1 { font-size: 20px; margin: 0 0 3px; letter-spacing: -.02em; color: #f8fafc; }
+    .subtitle { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    button, input, textarea, select { font: inherit; }
+
+    .btn {
+      border: 1px solid rgba(148,163,184,.25);
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      padding: 10px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform .16s ease, background .16s ease, border .16s ease, box-shadow .16s ease;
+      user-select: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+
+    .btn:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); border-color: rgba(125,211,252,.38); box-shadow: var(--shadow-soft); }
+    .btn.primary {
+      border-color: rgba(125,211,252,.48);
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #a78bfa);
+      color: #06111f;
+      font-weight: 800;
+      box-shadow: 0 14px 30px rgba(56,189,248,.26);
+    }
+    .btn.danger { border-color: rgba(251,113,133,.42); color: #fecdd3; background: rgba(251,113,133,.10); }
+    .btn.small { padding: 8px 10px; border-radius: 12px; font-size: 12px; }
+
+    .btn:disabled, .control:disabled, .color-control input:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .color-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 39px;
+      padding: 6px 10px;
+      border: 1px solid rgba(148,163,184,.25);
+      border-radius: 14px;
+      background: rgba(255,255,255,.08);
+      color: #e0f2fe;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+    .color-control input {
+      width: 30px;
+      height: 28px;
+      padding: 2px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    body:not(.is-admin) .node-edit,
+    body:not(.is-admin) .port {
+      display: none;
+    }
+    body:not(.is-admin) .connector-line,
+    body:not(.is-admin) .connector-hit {
+      pointer-events: none;
+      cursor: default;
+    }
+    body:not(.is-admin) .color-control {
+      opacity: .48;
+    }
+    body:not(.is-admin) .node {
+      cursor: default;
+    }
+
+    main {
+      position: relative;
+      min-height: 1180px;
+      min-width: 0;
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(rgba(148,163,184,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.055) 1px, transparent 1px),
+        radial-gradient(circle at 55% 98%, rgba(20,184,166,.12), transparent 30%),
+        linear-gradient(180deg, rgba(15,23,42,.66) 0%, rgba(2,6,23,.70) 100%);
+      background-size: 34px 34px, 34px 34px, auto, auto;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .canvas-toolbar {
+      position: sticky;
+      top: 14px;
+      left: 18px;
+      z-index: 20;
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      margin: 18px;
+      padding: 9px;
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 30px rgba(15,23,42,.08);
+      flex-wrap: wrap;
+      max-width: calc(100% - 36px);
+    }
+
+    #canvasScroll {
+      position: absolute;
+      inset: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: var(--radius);
+      cursor: grab;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #canvasScroll::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+    }
+    #canvasScroll.panning {
+      cursor: grabbing;
+    }
+
+    #canvas {
+      position: relative;
+      min-height: 100%;
+      min-width: 100%;
+      background:
+        linear-gradient(rgba(148,163,184,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.055) 1px, transparent 1px),
+        radial-gradient(circle at 55% 98%, rgba(20,184,166,.12), transparent 30%),
+        linear-gradient(180deg, rgba(15,23,42,.66) 0%, rgba(2,6,23,.70) 100%);
+      background-size: 34px 34px, 34px 34px, auto, auto;
+    }
+
+    svg.connectors {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .connector-line {
+      fill: none;
+      stroke: var(--line-color, var(--connector-color));
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 4px rgba(124,140,255,.24));
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+    .connector-line.selected-connector {
+      stroke-width: 3.2;
+      filter: drop-shadow(0 0 7px rgba(124,140,255,.34));
+    }
+    .connector-hit {
+      fill: none;
+      stroke: transparent;
+      stroke-width: 16;
+      stroke-linecap: round;
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+    .connector-shadow {
+      fill: none;
+      stroke: rgba(15,23,42,.07);
+      stroke-width: 4.6;
+      stroke-linecap: round;
+      pointer-events: none;
+    }
+    .connector-preview {
+      fill: none;
+      stroke: var(--connector-color);
+      stroke-width: 2;
+      stroke-dasharray: 8 8;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 6px rgba(124,140,255,.28));
+    }
+
+    .node {
+      position: absolute;
+      z-index: 5;
+      width: 172px;
+      min-height: 96px;
+      border: 1px solid rgba(148,163,184,.28);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.07));
+      box-shadow: 0 18px 44px rgba(0,0,0,.34), inset 4px 0 0 var(--node-color, #38bdf8);
+      cursor: grab;
+      user-select: none;
+      transition: transform .15s ease, border .15s ease, box-shadow .15s ease;
+    }
+    .node::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--node-color, #38bdf8) 36%, transparent), transparent 42%);
+      opacity: .70;
+      pointer-events: none;
+    }
+    .node:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56,189,248,.48);
+      box-shadow: 0 22px 56px rgba(0,0,0,.42), 0 0 0 4px rgba(56,189,248,.08);
+    }
+    .node.selected {
+      outline: 3px solid rgba(56,189,248,.45);
+      border-color: rgba(56,189,248,.72);
+    }
+    .node.connecting {
+      outline: 3px dashed rgba(34,197,94,.78);
+    }
+    .node.dragging { cursor: grabbing; opacity: .98; }
+
+    .node-inner {
+      position: relative;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-height: 96px;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+    .node-top {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+    }
+    .node-icon {
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #061018;
+      font-size: 11px;
+      font-weight: 900;
+      background: var(--node-color, #38bdf8);
+      box-shadow: 0 12px 24px rgba(0,0,0,.22);
+    }
+    .node-title {
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      word-break: break-word;
+      color: #f8fafc;
+    }
+    .node-type {
+      color: #c4b5fd;
+      font-size: 10.5px;
+      margin-top: 2px;
+      font-weight: 800;
+    }
+    .node-desc {
+      color: #cbd5e1;
+      font-size: 10.8px;
+      line-height: 1.32;
+      min-height: 24px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .node-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .node-open, .node-edit {
+      position: relative;
+      z-index: 2;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      color: #e0f2fe;
+      background: rgba(2,6,23,.42);
+      padding: 5px 8px;
+      font-size: 10.5px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: background .14s ease, transform .14s ease, border .14s ease;
+    }
+    .node-open:hover, .node-edit:hover { background: rgba(56,189,248,.18); border-color: rgba(125,211,252,.34); transform: translateY(-1px); }
+    .node-edit { color: #ddd6fe; }
+
+    .port {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border-radius: 50%;
+      border: 3px solid #0f172a;
+      background: var(--node-color, #38bdf8);
+      transform: translateY(-50%);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.12), 0 0 20px rgba(56,189,248,.24);
+      z-index: 8;
+      cursor: crosshair;
+    }
+    .port::after {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+    }
+    .port:hover, .port.active {
+      box-shadow: 0 0 0 6px rgba(34,197,94,.20), 0 0 28px rgba(34,197,94,.50);
+      background: #22c55e;
+    }
+    .port.left { left: -9px; }
+    .port.right { right: -9px; }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 80;
+      max-width: 480px;
+      border: 1px solid rgba(148,163,184,.24);
+      border-radius: 18px;
+      background: rgba(2,6,23,.84);
+      backdrop-filter: blur(16px);
+      color: #e5e7eb;
+      padding: 13px 15px;
+      box-shadow: 0 18px 48px rgba(0,0,0,.35);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(148,163,184,.24);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: #cbd5e1;
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 16px rgba(16,185,129,.7);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15,23,42,.28);
+      backdrop-filter: blur(10px);
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: min(620px, 100%);
+      border: 1px solid rgba(148,163,184,.28);
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(15,23,42,.98), rgba(30,41,59,.94));
+      box-shadow: 0 30px 90px rgba(0,0,0,.58);
+      overflow: hidden;
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(148,163,184,.20);
+      background: linear-gradient(135deg, rgba(15,23,42,.98), rgba(30,41,59,.96));
+    }
+    .modal-title { margin: 0; font-size: 18px; letter-spacing: -.02em; color: #f8fafc; }
+    .modal-subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .modal-body { padding: 18px 20px 20px; }
+    .field { margin: 0 0 13px; }
+    label {
+      display: block;
+      margin: 0 0 7px;
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 800;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid rgba(148,163,184,.26);
+      outline: none;
+      color: var(--text);
+      background: rgba(2,6,23,.45);
+      border-radius: 14px;
+      padding: 11px 12px;
+      transition: border .14s ease, box-shadow .14s ease;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(56,189,248,.65);
+      box-shadow: 0 0 0 4px rgba(56,189,248,.12);
+    }
+    select option { background: #0f172a; color: #f8fafc; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+    .modal-actions .group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    @media (max-width: 920px) {
+      .app { min-height: 100vh; grid-template-rows: auto minmax(1180px, 1fr); padding: 12px; }
+      header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px; }
+      .subtitle { white-space: normal; }
+      .top-actions { justify-content: flex-start; }
+      main { min-height: 1180px; }
+      .canvas-toolbar { align-items: flex-start; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01" />
+            <path d="M7 7h10M7 17h10M7 7v10M17 7v10" />
+          </svg>
+        </div>
+        <div>
+          <h1>Workflow Model untuk Presentasi</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn primary admin-control" id="addNodeTopBtn">+ Tambah Model</button>
+        <button class="btn admin-control" id="clearConnectorsBtn" title="Pilih konektor lalu klik untuk menghapus satu konektor">Hapus Konektor</button>
+        <button class="btn danger admin-control" id="deleteSelectedBtn">Hapus Model</button>
+        <label class="color-control admin-control" title="Pilih konektor lalu ubah warna. Jika tidak ada konektor terpilih, warna ini menjadi warna konektor baru.">
+          Warna Konektor
+          <input id="connectorColor" type="color" value="#7c8cff" />
+        </label>
+        <button class="btn" id="adminToggleBtn">Admin</button>
+      </div>
+    </header>
+
+    <main id="mainArea">
+      <div id="canvasScroll">
+        <div id="canvas" aria-label="Kanvas workflow">
+          <svg class="connectors" id="connectorSvg" aria-hidden="true">
+            <defs>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#60a5fa" />
+                <stop offset="100%" stop-color="#a78bfa" />
+              </linearGradient>
+              <marker id="arrow" markerWidth="10" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+                <path id="arrowPath" d="M1,1 L7,3 L1,5" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      <div class="toast" id="toast"></div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="editModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="modalTitle">Edit Model</h2>
+          <div class="modal-subtitle">Ubah nama, URL, kategori, warna, ikon, dan deskripsi model.</div>
+        </div>
+        <button class="btn small" id="closeModalBtn" type="button">Tutup</button>
+      </div>
+      <form class="modal-body" id="editForm">
+        <div class="field">
+          <label for="editName">Nama Model</label>
+          <input id="editName" placeholder="Contoh: Model Prediksi" required />
+        </div>
+        <div class="field">
+          <label for="editUrl">URL yang dibuka saat tombol Buka URL diklik</label>
+          <input id="editUrl" placeholder="https://contoh.com/dashboard" />
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="editType">Kategori</label>
+            <select id="editType">
+              <option>Input</option>
+              <option>Model</option>
+              <option>API</option>
+              <option>Dashboard</option>
+              <option>Output</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="editIcon">Ikon / Inisial</label>
+            <input id="editIcon" maxlength="3" placeholder="AI" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="editColor">Warna Model</label>
+            <input id="editColor" type="color" value="#38bdf8" style="height:44px; padding:6px" />
+          </div>
+          <div class="field">
+            <label for="editNote">Catatan</label>
+            <input id="editNote" placeholder="Opsional" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="editDesc">Deskripsi Singkat</label>
+          <textarea id="editDesc" placeholder="Tulis keterangan untuk kebutuhan presentasi"></textarea>
+        </div>
+        <div class="modal-actions">
+          <div class="group">
+            <button class="btn danger" id="deleteFromModalBtn" type="button">Hapus</button>
+            <button class="btn" id="openFromModalBtn" type="button">Buka URL</button>
+          </div>
+          <div class="group">
+            <button class="btn" id="cancelEditBtn" type="button">Batal</button>
+            <button class="btn primary" type="submit">Simpan Edit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="modal-backdrop" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+    <div class="modal" style="width:min(440px,100%)">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="adminModalTitle">Login Admin</h2>
+          <div class="modal-subtitle">Masuk sebagai admin untuk menambah, mengedit, menghapus model, konektor, dan warna konektor.</div>
+        </div>
+        <button class="btn small" id="closeAdminModalBtn" type="button">Tutup</button>
+      </div>
+      <form class="modal-body" id="adminForm">
+        <div class="field">
+          <label for="adminUsername">Username</label>
+          <input id="adminUsername" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="adminPassword">Password</label>
+          <input id="adminPassword" type="password" autocomplete="current-password" />
+        </div>
+        <div class="modal-actions" style="justify-content:flex-end">
+          <div class="group">
+            <button class="btn" id="cancelAdminBtn" type="button">Batal</button>
+            <button class="btn primary" type="submit">Login</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const app = document.querySelector('.app');
+    const canvasScroll = document.getElementById('canvasScroll');
+    const canvas = document.getElementById('canvas');
+    const mainArea = document.getElementById('mainArea');
+    const svg = document.getElementById('connectorSvg');
+    const toast = document.getElementById('toast');
+
+    const addNodeTopBtn = document.getElementById('addNodeTopBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const clearConnectorsBtn = document.getElementById('clearConnectorsBtn');
+    const connectorColorInput = document.getElementById('connectorColor');
+    const adminToggleBtn = document.getElementById('adminToggleBtn');
+    const arrowPath = document.getElementById('arrowPath');
+
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const deleteFromModalBtn = document.getElementById('deleteFromModalBtn');
+    const openFromModalBtn = document.getElementById('openFromModalBtn');
+    const editName = document.getElementById('editName');
+    const editUrl = document.getElementById('editUrl');
+    const editType = document.getElementById('editType');
+    const editIcon = document.getElementById('editIcon');
+    const editColor = document.getElementById('editColor');
+    const editNote = document.getElementById('editNote');
+    const editDesc = document.getElementById('editDesc');
+
+    const adminModal = document.getElementById('adminModal');
+    const adminForm = document.getElementById('adminForm');
+    const adminUsername = document.getElementById('adminUsername');
+    const adminPassword = document.getElementById('adminPassword');
+    const closeAdminModalBtn = document.getElementById('closeAdminModalBtn');
+    const cancelAdminBtn = document.getElementById('cancelAdminBtn');
+
+    let nodes = [];
+    let connectors = [];
+    let selectedId = null;
+    let selectedConnectorIndex = null;
+    let isAdmin = false;
+    let connectorColor = '#7c8cff';
+    let editingId = null;
+    let connectionStart = null;
+    let potentialConnectionDrag = null;
+    let suppressNextPortClick = false;
+    let dragState = null;
+    let panState = null;
+    let nodeCounter = 1;
+    const MIN_CANVAS_HEIGHT = 1180;
+    const MIN_CANVAS_WIDTH = 1800;
+    const NODE_HEIGHT_ESTIMATE = 120;
+    const NODE_WIDTH_ESTIMATE = 220;
+
+    const demoNodes = [
+      {
+        id: 'node-1', name: 'Data Input', type: 'Input', url: 'https://example.com/data-input',
+        desc: 'Sumber data awal untuk pipeline model.', note: '', color: '#38bdf8', icon: 'IN', x: 110, y: 150
+      },
+      {
+        id: 'node-2', name: 'Model AI', type: 'Model', url: 'https://example.com/model-ai',
+        desc: 'Tombol model utama. Klik Buka URL untuk membuka tautan.', note: '', color: '#a78bfa', icon: 'AI', x: 345, y: 240
+      },
+      {
+        id: 'node-3', name: 'API Service', type: 'API', url: 'https://example.com/api-service',
+        desc: 'Endpoint atau layanan integrasi.', note: '', color: '#22c55e', icon: 'API', x: 590, y: 150
+      },
+      {
+        id: 'node-4', name: 'Dashboard', type: 'Dashboard', url: 'https://example.com/dashboard',
+        desc: 'Output visual untuk ditampilkan saat presentasi.', note: '', color: '#f59e0b', icon: 'DB', x: 590, y: 390
+      }
+    ];
+    const demoConnectors = [
+      { from: 'node-1', to: 'node-2', fromSide: 'right', toSide: 'left' },
+      { from: 'node-2', to: 'node-3', fromSide: 'right', toSide: 'left' },
+      { from: 'node-2', to: 'node-4', fromSide: 'right', toSide: 'left' }
+    ];
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function setStatus(message) {
+      // Status instruksi sengaja tidak ditampilkan di UI agar kanvas tetap bersih.
+    }
+
+    function requireAdmin(action = 'melakukan perubahan') {
+      if (isAdmin) return true;
+      showToast('Login sebagai admin untuk ' + action + '.');
+      return false;
+    }
+
+    function applyConnectorColor(color) {
+      const nextColor = color || '#7c8cff';
+      if (selectedConnectorIndex !== null && connectors[selectedConnectorIndex]) {
+        connectors[selectedConnectorIndex].color = nextColor;
+      } else {
+        connectorColor = nextColor;
+        document.documentElement.style.setProperty('--connector-color', connectorColor);
+      }
+      if (connectorColorInput) connectorColorInput.value = nextColor;
+      drawConnectors();
+    }
+
+    function createArrowMarker(index, color) {
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'arrow-' + index);
+      marker.setAttribute('class', 'dynamic-marker');
+      marker.setAttribute('markerWidth', '10');
+      marker.setAttribute('markerHeight', '8');
+      marker.setAttribute('refX', '7');
+      marker.setAttribute('refY', '3');
+      marker.setAttribute('orient', 'auto');
+      marker.setAttribute('markerUnits', 'userSpaceOnUse');
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      arrow.setAttribute('d', 'M1,1 L7,3 L1,5');
+      arrow.setAttribute('fill', 'none');
+      arrow.setAttribute('stroke', color);
+      arrow.setAttribute('stroke-width', '1.8');
+      arrow.setAttribute('stroke-linecap', 'round');
+      arrow.setAttribute('stroke-linejoin', 'round');
+      marker.appendChild(arrow);
+      svg.querySelector('defs')?.appendChild(marker);
+      return marker;
+    }
+
+    function selectConnector(index) {
+      if (!requireAdmin('mengubah warna konektor')) return;
+      selectedConnectorIndex = index;
+      selectedId = null;
+      document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
+      const color = connectors[index]?.color || connectorColor;
+      if (connectorColorInput) connectorColorInput.value = color;
+      drawConnectors();
+      showToast('Konektor dipilih. Ubah warnanya lewat kontrol Warna Konektor.');
+    }
+
+    function updateAdminUI() {
+      document.body.classList.toggle('is-admin', isAdmin);
+      adminToggleBtn.textContent = isAdmin ? 'Logout Admin' : 'Admin';
+      document.querySelectorAll('.admin-control').forEach(control => {
+        const input = control.matches?.('input') ? control : control.querySelector?.('input');
+        if (control.tagName === 'BUTTON') control.disabled = !isAdmin;
+        if (input) input.disabled = !isAdmin;
+      });
+      if (!isAdmin) {
+        closeEditModal();
+        connectionStart = null;
+        potentialConnectionDrag = null;
+      }
+      markConnectionStart();
+    }
+
+    function openAdminModal() {
+      adminUsername.value = '';
+      adminPassword.value = '';
+      adminModal.classList.add('show');
+      setTimeout(() => adminUsername.focus(), 30);
+    }
+
+    function closeAdminModal() {
+      adminModal.classList.remove('show');
+    }
+
+    function getAdminUsername() {
+      return [97, 100, 109, 105, 110].map(code => String.fromCharCode(code)).join('');
+    }
+
+    function getAdminPassword() {
+      return [49, 50, 51, 52, 53, 54, 55, 56].map(code => String.fromCharCode(code)).join('');
+    }
+
+    function safeUrl(raw) {
+      const value = String(raw || '').trim();
+      if (!value) return '';
+      if (/^https?:\/\//i.test(value)) return value;
+      return 'https://' + value;
+    }
+
+    function escapeHtml(text) {
+      return String(text || '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
+
+    function getNode(id) { return nodes.find(n => n.id === id); }
+
+    function adjustCanvasHeight() {
+      const maxBottom = nodes.reduce((max, node) => Math.max(max, (node.y || 0) + NODE_HEIGHT_ESTIMATE), 0);
+      const maxRight = nodes.reduce((max, node) => Math.max(max, (node.x || 0) + NODE_WIDTH_ESTIMATE), 0);
+      const viewportTarget = Math.max(MIN_CANVAS_HEIGHT, window.innerHeight - 126);
+      const widthTarget = Math.max(MIN_CANVAS_WIDTH, window.innerWidth - 36);
+      const nextHeight = Math.max(viewportTarget, maxBottom + 260);
+      const nextWidth = Math.max(widthTarget, maxRight + 420);
+      mainArea.style.minHeight = nextHeight + 'px';
+      mainArea.style.height = nextHeight + 'px';
+      canvas.style.height = nextHeight + 'px';
+      canvas.style.width = nextWidth + 'px';
+      if (canvasScroll) canvasScroll.style.height = nextHeight + 'px';
+      svg.setAttribute('width', nextWidth);
+      svg.setAttribute('height', nextHeight);
+    }
+
+    function selectNode(id) {
+      selectedId = id;
+      document.querySelectorAll('.node').forEach(el => el.classList.toggle('selected', el.dataset.id === id));
+    }
+
+    function clearSelection() {
+      selectedId = null;
+      selectedConnectorIndex = null;
+      document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
+      if (connectorColorInput) connectorColorInput.value = connectorColor;
+      drawConnectors();
+    }
+
+    function createNodeElement(node) {
+      const el = document.createElement('div');
+      el.className = 'node';
+      el.dataset.id = node.id;
+      el.style.left = node.x + 'px';
+      el.style.top = node.y + 'px';
+      el.style.setProperty('--node-color', node.color);
+      el.innerHTML = `
+        <button class="port left" data-side="left" title="Handle konektor masuk / keluar" aria-label="Handle kiri ${escapeHtml(node.name)}"></button>
+        <button class="port right" data-side="right" title="Handle konektor masuk / keluar" aria-label="Handle kanan ${escapeHtml(node.name)}"></button>
+        <div class="node-inner">
+          <div class="node-top">
+            <div class="node-icon">${escapeHtml(node.icon || 'M')}</div>
+            <div>
+              <div class="node-title">${escapeHtml(node.name)}</div>
+              <div class="node-type">${escapeHtml(node.type)}</div>
+            </div>
+          </div>
+          <div class="node-desc">${escapeHtml(node.desc || 'Klik Edit untuk mengisi deskripsi.')}</div>
+          <div class="node-actions">
+            <button class="node-open" title="Buka URL model">Buka URL</button>
+            <button class="node-edit" title="Edit data model">Edit</button>
+          </div>
+        </div>`;
+
+      el.addEventListener('pointerdown', startDrag);
+
+      el.querySelectorAll('.port').forEach(port => {
+        port.addEventListener('pointerdown', event => {
+          startPortPointer(event, node.id, port.dataset.side);
+        });
+        port.addEventListener('click', event => {
+          event.stopPropagation();
+          handlePortClick(node.id, port.dataset.side);
+        });
+      });
+
+      el.querySelector('.node-open').addEventListener('click', event => {
+        event.stopPropagation();
+        openNodeUrl(node.id);
+      });
+
+      el.querySelector('.node-edit').addEventListener('click', event => {
+        event.stopPropagation();
+        openEditModal(node.id);
+      });
+
+      el.addEventListener('click', event => {
+        if (event.target.closest('button')) return;
+        event.stopPropagation();
+        if (connectionStart) {
+          if (!requireAdmin('membuat konektor')) return;
+          if (connectionStart.id === node.id) {
+            showToast('Pilih model tujuan yang berbeda.');
+            return;
+          }
+          const targetSide = connectionStart.side === 'right' ? 'left' : 'right';
+          completeConnection(node.id, targetSide);
+          return;
+        }
+        selectNode(node.id);
+      });
+
+      return el;
+    }
+
+    function render() {
+      adjustCanvasHeight();
+      document.querySelectorAll('.node').forEach(el => el.remove());
+      nodes.forEach(node => canvas.appendChild(createNodeElement(node)));
+      if (selectedId) selectNode(selectedId);
+      markConnectionStart();
+      drawConnectors();
+      updateAdminUI();
+    }
+
+    function getAnchor(el, side) {
+      const canvasRect = canvas.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+      return {
+        x: (side === 'left' ? rect.left : rect.right) - canvasRect.left,
+        y: rect.top + rect.height / 2 - canvasRect.top
+      };
+    }
+
+    function getNodeCenter(id) {
+      const el = document.querySelector(`.node[data-id="${id}"]`);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2 - canvasRect.left,
+        y: rect.top + rect.height / 2 - canvasRect.top
+      };
+    }
+
+    function getSmartSides(fromId, toId, fallbackFromSide = 'right', fallbackToSide = 'left') {
+      const fromCenter = getNodeCenter(fromId);
+      const toCenter = getNodeCenter(toId);
+      if (!fromCenter || !toCenter) {
+        return { fromSide: fallbackFromSide, toSide: fallbackToSide };
+      }
+      const dx = toCenter.x - fromCenter.x;
+      if (Math.abs(dx) > 42) {
+        return dx >= 0
+          ? { fromSide: 'right', toSide: 'left' }
+          : { fromSide: 'left', toSide: 'right' };
+      }
+      return { fromSide: fallbackFromSide, toSide: fallbackToSide };
+    }
+
+    function buildPath(a, b, fromSide, toSide) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      const fromDir = fromSide === 'left' ? -1 : 1;
+      const toDir = toSide === 'left' ? -1 : 1;
+      let c1x, c1y, c2x, c2y;
+
+      // Kalau port saling berhadapan secara alami, pakai tangent pendek dari sisi port.
+      if (absDx > 46 && Math.sign(dx || 1) === fromDir && Math.sign(-dx || -1) === toDir) {
+        const handle = Math.min(110, Math.max(34, absDx * .36));
+        c1x = a.x + handle * fromDir;
+        c1y = a.y;
+        c2x = b.x + handle * toDir;
+        c2y = b.y;
+      } else {
+        // Kalau posisi tidak sejajar/handle tidak berhadapan, tetap jaga tangent awal dan akhir
+        // searah dengan sisi port. Dengan begitu ujung panah menyatu natural dengan kurva.
+        const handle = Math.min(92, Math.max(36, absDx * .28 + absDy * .12));
+        const yBend = Math.sign(dy || 1) * Math.min(54, Math.max(16, absDy * .24));
+        c1x = a.x + handle * fromDir;
+        c1y = a.y + yBend;
+        c2x = b.x + handle * toDir;
+        c2y = b.y - yBend;
+      }
+      return `M ${a.x} ${a.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${b.x} ${b.y}`;
+    }
+
+    function drawConnectors() {
+      [...svg.querySelectorAll('path.dynamic')].forEach(p => p.remove());
+      [...svg.querySelectorAll('marker.dynamic-marker')].forEach(m => m.remove());
+      connectors.forEach((conn, index) => {
+        const fromEl = document.querySelector(`.node[data-id="${conn.from}"]`);
+        const toEl = document.querySelector(`.node[data-id="${conn.to}"]`);
+        if (!fromEl || !toEl) return;
+        const fromSide = conn.fromSide || 'right';
+        const toSide = conn.toSide || 'left';
+        const a = getAnchor(fromEl, fromSide);
+        const b = getAnchor(toEl, toSide);
+        const d = buildPath(a, b, fromSide, toSide);
+        const lineColor = conn.color || connectorColor;
+        createArrowMarker(index, lineColor);
+
+        const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        shadow.setAttribute('d', d);
+        shadow.setAttribute('class', 'connector-shadow dynamic');
+
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        hit.setAttribute('d', d);
+        hit.setAttribute('class', 'connector-hit dynamic');
+        hit.addEventListener('click', event => {
+          event.stopPropagation();
+          selectConnector(index);
+        });
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'connector-line dynamic' + (selectedConnectorIndex === index ? ' selected-connector' : ''));
+        path.style.setProperty('--line-color', lineColor);
+        path.setAttribute('marker-end', `url(#arrow-${index})`);
+        path.addEventListener('click', event => {
+          event.stopPropagation();
+          selectConnector(index);
+        });
+
+        svg.appendChild(shadow);
+        svg.appendChild(hit);
+        svg.appendChild(path);
+      });
+      drawPreviewConnector();
+    }
+
+    function drawPreviewConnector(point) {
+      [...svg.querySelectorAll('path.preview')].forEach(p => p.remove());
+      if (!connectionStart) return;
+      const fromEl = document.querySelector(`.node[data-id="${connectionStart.id}"]`);
+      if (!fromEl) return;
+      const a = getAnchor(fromEl, connectionStart.side);
+      const target = point || connectionStart.preview || { x: a.x + (connectionStart.side === 'right' ? 160 : -160), y: a.y };
+      const d = buildPath(a, target, connectionStart.side, connectionStart.side === 'right' ? 'left' : 'right');
+      const preview = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      preview.setAttribute('d', d);
+      preview.setAttribute('class', 'connector-preview preview');
+      svg.appendChild(preview);
+    }
+
+    function markConnectionStart() {
+      document.querySelectorAll('.node').forEach(el => el.classList.remove('connecting'));
+      document.querySelectorAll('.port').forEach(port => port.classList.remove('active'));
+      if (!connectionStart) return;
+      const nodeEl = document.querySelector(`.node[data-id="${connectionStart.id}"]`);
+      nodeEl?.classList.add('connecting');
+      nodeEl?.querySelector(`.port.${connectionStart.side}`)?.classList.add('active');
+    }
+
+    function startPortPointer(event, id, side) {
+      if (event.button !== undefined && event.button !== 0) return;
+      event.stopPropagation();
+      if (!requireAdmin('membuat konektor')) return;
+      potentialConnectionDrag = {
+        id,
+        side,
+        startX: event.clientX,
+        startY: event.clientY,
+        dragging: false
+      };
+    }
+
+    function resolveConnectionTarget(clientX, clientY, sourceId, sourceSide) {
+      const target = document.elementFromPoint(clientX, clientY);
+      if (!target) return null;
+      const port = target.closest?.('.port');
+      const nodeEl = target.closest?.('.node');
+      if (!nodeEl) return null;
+      const targetId = nodeEl.dataset.id;
+      if (!targetId || targetId === sourceId) return null;
+      return {
+        id: targetId,
+        side: port?.dataset?.side || (sourceSide === 'right' ? 'left' : 'right')
+      };
+    }
+
+    function handlePortClick(id, side) {
+      if (suppressNextPortClick) {
+        suppressNextPortClick = false;
+        return;
+      }
+      if (!requireAdmin('membuat konektor')) return;
+      selectNode(id);
+      if (!connectionStart) {
+        connectionStart = { id, side, preview: null };
+        markConnectionStart();
+        drawConnectors();
+        setStatus('');
+        showToast('Handle awal dipilih. Klik handle atau badan model tujuan.');
+        return;
+      }
+
+      if (connectionStart.id === id && connectionStart.side === side) {
+        cancelConnection('Konektor dibatalkan.');
+        return;
+      }
+      if (connectionStart.id === id) {
+        showToast('Pilih model tujuan yang berbeda.');
+        return;
+      }
+      completeConnection(id, side);
+    }
+
+    function completeConnection(targetId, targetSide) {
+      if (!requireAdmin('membuat konektor')) return;
+      if (!connectionStart) return;
+      const smartSides = getSmartSides(connectionStart.id, targetId, connectionStart.side, targetSide);
+      const newConn = {
+        from: connectionStart.id,
+        to: targetId,
+        fromSide: smartSides.fromSide,
+        toSide: smartSides.toSide,
+        color: connectorColor
+      };
+      const exists = connectors.some(c =>
+        c.from === newConn.from && c.to === newConn.to &&
+        (c.fromSide || 'right') === newConn.fromSide &&
+        (c.toSide || 'left') === newConn.toSide
+      );
+      if (!exists) connectors.push(newConn);
+      connectionStart = null;
+      potentialConnectionDrag = null;
+      selectedConnectorIndex = exists ? selectedConnectorIndex : connectors.length - 1;
+      setStatus('');
+      markConnectionStart();
+      drawConnectors();
+      showToast(exists ? 'Konektor tersebut sudah ada.' : 'Konektor berhasil dibuat.');
+    }
+
+    function cancelConnection(message = 'Mode konektor dibatalkan.') {
+      connectionStart = null;
+      potentialConnectionDrag = null;
+      setStatus('');
+      markConnectionStart();
+      drawConnectors();
+      showToast(message);
+    }
+
+    function deleteSelectedConnector() {
+      if (!requireAdmin('menghapus konektor')) return;
+      if (selectedConnectorIndex === null || !connectors[selectedConnectorIndex]) {
+        showToast('Pilih satu konektor terlebih dahulu, lalu klik Hapus Konektor.');
+        return;
+      }
+      connectors.splice(selectedConnectorIndex, 1);
+      selectedConnectorIndex = null;
+      if (connectorColorInput) connectorColorInput.value = connectorColor;
+      drawConnectors();
+      showToast('Konektor terpilih berhasil dihapus.');
+    }
+
+    function addNode(base = {}) {
+      if (!requireAdmin('menambah model')) return;
+      const rect = canvas.getBoundingClientRect();
+      const id = 'node-' + Date.now() + '-' + nodeCounter++;
+      const lowestY = nodes.length ? Math.max(...nodes.map(node => node.y || 0)) : 0;
+      const columnX = 110 + ((nodes.length % 4) * 215);
+      const node = {
+        id,
+        name: base.name || 'Model Baru',
+        type: base.type || 'Model',
+        url: base.url || 'https://example.com',
+        desc: base.desc || 'Klik Edit untuk mengisi deskripsi dan URL model.',
+        note: base.note || '',
+        color: base.color || ['#38bdf8', '#a78bfa', '#22c55e', '#f59e0b', '#fb7185'][nodes.length % 5],
+        icon: base.icon || 'AI',
+        x: base.x ?? Math.max(70, Math.min(rect.width - 205, columnX)),
+        y: base.y ?? Math.max(150, lowestY + 150)
+      };
+      nodes.push(node);
+      render();
+      selectNode(id);
+      openEditModal(id);
+      setTimeout(() => window.scrollTo({ top: Math.max(0, node.y - 180), behavior: 'smooth' }), 80);
+      showToast('Model baru ditambahkan di area bawah. Silakan edit datanya.');
+    }
+
+    function openNodeUrl(id) {
+      const node = getNode(id);
+      if (!node) return;
+      const url = safeUrl(node.url);
+      if (!url) {
+        showToast('URL belum diisi untuk model ini. Klik Edit untuk mengisi URL.');
+        openEditModal(id);
+        return;
+      }
+      window.open(url, '_blank', 'noopener,noreferrer');
+      showToast('Membuka URL: ' + url);
+    }
+
+    function openUrlValue(raw) {
+      const url = safeUrl(raw);
+      if (!url) return showToast('URL belum diisi.');
+      window.open(url, '_blank', 'noopener,noreferrer');
+      showToast('Membuka URL: ' + url);
+    }
+
+    function openEditModal(id) {
+      if (!requireAdmin('mengedit model')) return;
+      const node = getNode(id);
+      if (!node) return;
+      editingId = id;
+      selectNode(id);
+      editName.value = node.name || '';
+      editUrl.value = node.url || '';
+      editType.value = node.type || 'Model';
+      editIcon.value = node.icon || '';
+      editColor.value = node.color || '#38bdf8';
+      editNote.value = node.note || '';
+      editDesc.value = node.desc || '';
+      editModal.classList.add('show');
+      setTimeout(() => editName.focus(), 30);
+    }
+
+    function closeEditModal() {
+      editModal.classList.remove('show');
+      editingId = null;
+    }
+
+    function saveEdit() {
+      if (!requireAdmin('menyimpan edit')) return;
+      const node = getNode(editingId);
+      if (!node) return;
+      node.name = editName.value.trim() || 'Tanpa Nama';
+      node.url = editUrl.value.trim();
+      node.type = editType.value || 'Model';
+      node.icon = (editIcon.value.trim() || 'M').slice(0, 3).toUpperCase();
+      node.color = editColor.value || '#38bdf8';
+      node.note = editNote.value.trim();
+      node.desc = editDesc.value.trim();
+      render();
+      selectNode(node.id);
+      closeEditModal();
+      showToast('Edit model berhasil disimpan.');
+    }
+
+    function deleteNode(id) {
+      if (!requireAdmin('menghapus model')) return;
+      if (!id) return showToast('Pilih model terlebih dahulu.');
+      nodes = nodes.filter(n => n.id !== id);
+      connectors = connectors.filter(c => c.from !== id && c.to !== id);
+      selectedConnectorIndex = null;
+      if (selectedId === id) selectedId = null;
+      if (editingId === id) closeEditModal();
+      if (connectionStart?.id === id) connectionStart = null;
+      render();
+      showToast('Model dihapus.');
+    }
+
+    function resetDemo() {
+      nodes = demoNodes.map(n => ({ ...n }));
+      connectors = demoConnectors.map(c => ({ ...c, color: c.color || connectorColor }));
+      selectedId = null;
+      selectedConnectorIndex = null;
+      editingId = null;
+      connectionStart = null;
+      potentialConnectionDrag = null;
+      nodeCounter = 5;
+      closeEditModal();
+      render();
+      setStatus('');
+      showToast('Demo workflow dikembalikan.');
+    }
+
+    function fitLayout() {
+      const rect = canvas.getBoundingClientRect();
+      const positions = [
+        [110, 150],
+        [Math.max(330, rect.width * .34), 240],
+        [Math.max(565, rect.width * .58), 150],
+        [Math.max(565, rect.width * .58), 390],
+        [Math.max(790, rect.width * .78), 260]
+      ];
+      nodes.forEach((node, i) => {
+        const pos = positions[i] || [110 + (i % 4) * 215, 560 + Math.floor((i - 5) / 4) * 155];
+        node.x = Math.max(40, Math.min(rect.width - 205, pos[0]));
+        node.y = Math.max(120, pos[1]);
+      });
+      render();
+      showToast('Posisi workflow dirapikan. Area bawah tetap bisa discroll.');
+    }
+
+    function startCanvasPan(event) {
+      if (event.button !== undefined && event.button !== 0) return;
+      if (event.target.closest?.('.node, button, input, textarea, select, .connector-line, .connector-hit')) return;
+      panState = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        startScrollLeft: canvasScroll.scrollLeft,
+        startScrollTop: window.scrollY
+      };
+      canvasScroll.classList.add('panning');
+      canvasScroll.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    }
+
+    function updateCanvasPan(event) {
+      if (!panState) return false;
+      const dx = event.clientX - panState.startX;
+      const dy = event.clientY - panState.startY;
+      canvasScroll.scrollLeft = panState.startScrollLeft - dx;
+      window.scrollTo(window.scrollX, panState.startScrollTop - dy);
+      return true;
+    }
+
+    function stopCanvasPan() {
+      if (!panState) return false;
+      panState = null;
+      canvasScroll.classList.remove('panning');
+      return true;
+    }
+
+    function startDrag(event) {
+      if (event.target.closest('button, input, textarea, select')) return;
+      if (!isAdmin) return;
+      const el = event.currentTarget;
+      const node = getNode(el.dataset.id);
+      if (!node) return;
+      selectNode(node.id);
+      const rect = el.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      dragState = {
+        id: node.id,
+        pointerId: event.pointerId,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        canvasLeft: canvasRect.left,
+        canvasTop: canvasRect.top,
+        canvasWidth: canvasRect.width,
+        canvasHeight: canvasRect.height
+      };
+      el.classList.add('dragging');
+      el.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    }
+
+    window.addEventListener('pointermove', event => {
+      if (updateCanvasPan(event)) return;
+
+      if (potentialConnectionDrag && isAdmin) {
+        const dx = event.clientX - potentialConnectionDrag.startX;
+        const dy = event.clientY - potentialConnectionDrag.startY;
+        const movedFarEnough = Math.hypot(dx, dy) > 5;
+        if (movedFarEnough && !potentialConnectionDrag.dragging) {
+          potentialConnectionDrag.dragging = true;
+          connectionStart = {
+            id: potentialConnectionDrag.id,
+            side: potentialConnectionDrag.side,
+            preview: null
+          };
+          selectNode(connectionStart.id);
+          markConnectionStart();
+          setStatus('');
+        }
+        if (potentialConnectionDrag.dragging && connectionStart) {
+          const canvasRect = canvas.getBoundingClientRect();
+          connectionStart.preview = {
+            x: event.clientX - canvasRect.left,
+            y: event.clientY - canvasRect.top
+          };
+          drawConnectors();
+          return;
+        }
+      }
+
+      if (dragState) {
+        const node = getNode(dragState.id);
+        const el = document.querySelector(`.node[data-id="${dragState.id}"]`);
+        if (!node || !el) return;
+        const newX = event.clientX - dragState.canvasLeft - dragState.offsetX;
+        const newY = event.clientY - dragState.canvasTop - dragState.offsetY;
+        const currentHeight = Math.max(dragState.canvasHeight, mainArea.getBoundingClientRect().height);
+        const clampedX = Math.max(16, newX);
+        const clampedY = Math.max(92, Math.min(currentHeight - el.offsetHeight - 16, newY));
+        node.x = clampedX;
+        node.y = clampedY;
+        el.style.left = node.x + 'px';
+        el.style.top = node.y + 'px';
+        adjustCanvasHeight();
+        drawConnectors();
+        return;
+      }
+
+      if (connectionStart) {
+        const canvasRect = canvas.getBoundingClientRect();
+        connectionStart.preview = {
+          x: event.clientX - canvasRect.left,
+          y: event.clientY - canvasRect.top
+        };
+        drawConnectors();
+      }
+    });
+
+    window.addEventListener('pointerup', event => {
+      if (stopCanvasPan()) return;
+
+      if (potentialConnectionDrag) {
+        const dragInfo = potentialConnectionDrag;
+        potentialConnectionDrag = null;
+        if (dragInfo.dragging) {
+          const target = resolveConnectionTarget(event.clientX, event.clientY, dragInfo.id, dragInfo.side);
+          suppressNextPortClick = true;
+          setTimeout(() => { suppressNextPortClick = false; }, 80);
+          if (target) {
+            completeConnection(target.id, target.side);
+          } else {
+            cancelConnection('Konektor dibatalkan. Lepaskan tepat di handle/model tujuan.');
+          }
+          return;
+        }
+      }
+
+      if (!dragState) return;
+      const el = document.querySelector(`.node[data-id="${dragState.id}"]`);
+      el?.classList.remove('dragging');
+      dragState = null;
+    });
+
+    canvasScroll.addEventListener('pointerdown', startCanvasPan);
+
+    addNodeTopBtn.addEventListener('click', () => addNode());
+    clearConnectorsBtn.addEventListener('click', deleteSelectedConnector);
+    deleteSelectedBtn.addEventListener('click', () => deleteNode(selectedId));
+    connectorColorInput.addEventListener('input', event => {
+      if (!requireAdmin('mengubah warna konektor')) return;
+      applyConnectorColor(event.target.value);
+    });
+    adminToggleBtn.addEventListener('click', () => {
+      if (isAdmin) {
+        isAdmin = false;
+        updateAdminUI();
+        showToast('Mode admin dinonaktifkan.');
+      } else {
+        openAdminModal();
+      }
+    });
+
+    editForm.addEventListener('submit', event => {
+      event.preventDefault();
+      saveEdit();
+    });
+    closeModalBtn.addEventListener('click', closeEditModal);
+    cancelEditBtn.addEventListener('click', closeEditModal);
+    deleteFromModalBtn.addEventListener('click', () => deleteNode(editingId));
+    openFromModalBtn.addEventListener('click', () => openUrlValue(editUrl.value));
+    editModal.addEventListener('click', event => {
+      if (event.target === editModal) closeEditModal();
+    });
+
+    adminForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const username = adminUsername.value.trim();
+      const password = adminPassword.value;
+      if (username === getAdminUsername() && password === getAdminPassword()) {
+        isAdmin = true;
+        closeAdminModal();
+        updateAdminUI();
+        showToast('Login admin berhasil. CRUD aktif.');
+      } else {
+        showToast('Username atau password admin salah.');
+      }
+    });
+    closeAdminModalBtn.addEventListener('click', closeAdminModal);
+    cancelAdminBtn.addEventListener('click', closeAdminModal);
+    adminModal.addEventListener('click', event => {
+      if (event.target === adminModal) closeAdminModal();
+    });
+
+    window.addEventListener('resize', () => { adjustCanvasHeight(); drawConnectors(); });
+    window.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        if (adminModal.classList.contains('show')) closeAdminModal();
+        else if (editModal.classList.contains('show')) closeEditModal();
+        else if (connectionStart) cancelConnection();
+      }
+      if ((event.key === 'Delete' || event.key === 'Backspace') &&
+          !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
+          !editModal.classList.contains('show')) {
+        if (selectedConnectorIndex !== null) deleteSelectedConnector();
+        else deleteNode(selectedId);
+      }
+    });
+
+    mainArea.addEventListener('click', event => {
+      if (event.target === mainArea || event.target === canvas) {
+        if (connectionStart) cancelConnection('Konektor dibatalkan.');
+        clearSelection();
+      }
+    });
+
+    resetDemo();
+    applyConnectorColor(connectorColor);
+    updateAdminUI();
+  </script>
+</body>
+</html>
