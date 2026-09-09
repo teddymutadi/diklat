@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latsama Ma'arif</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('#'); /* Ganti URL dengan link gambar ruang angkasa yang diinginkan */
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+        }
+        header {
+            background-color: green;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 5px solid yellow;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5em; /* Menyesuaikan agar tidak terlalu besar di HP */
+        }
+        header h3 {
+            margin: 5px 0;
+            font-size: 1em; /* Ukuran lebih kecil untuk layar HP */
+        }
+        .link-bar {
+            display: block;
+            width: 80%; /* Lebih fleksibel dibandingkan ukuran tetap */
+            max-width: 500px; /* Agar tidak terlalu lebar di layar besar */
+            height: 50px;
+            background-color: green;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            text-decoration: none;
+            margin: 15px auto;
+            border-radius: 5px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .link-bar:hover {
+            transform: scale(1.05);
+            background-color: darkblue;
+        }
+        /* Responsif untuk layar kecil */
+        @media (max-width: 600px) {
+            .link-bar {
+                width: 90%; /* Memastikan link cukup besar untuk diklik di HP */
+                height: 45px;
+                line-height: 45px;
+                font-size: 0.9em; /* Ukuran teks lebih kecil agar muat di layar kecil */
+            }
+            header h1 {
+                font-size: 1.2em;
+            }
+            header h3 {
+                font-size: 0.9em;
+            }
+        }
+
+	.moving-image {
+        position: absolute;
+        width: 100px; /* Sesuaikan ukuran gambar */
+        height: auto;
+    }
+    </style>
+
+
+<img src="https://www.geocities.ws/mrteddy/latsama/images/logo%20NU.png" alt="Gambar Bergerak" class="moving-image" id="randomImage">
+
+
+<script>
+    function moveImageRandomly() {
+        const image = document.getElementById('randomImage');
+        const maxX = window.innerWidth - image.clientWidth;
+        const maxY = window.innerHeight - image.clientHeight;
+
+        const randomX = Math.random() * maxX;
+        const randomY = Math.random() * maxY;
+
+        image.style.left = randomX + 'px';
+        image.style.top = randomY + 'px';
+    }
+
+    setInterval(moveImageRandomly, 2000); // Pindah setiap 2 detik
+</script>
+
+
+
+</head>
+<body>
+    <header>
+        <h1>Latsama Kepala Madrasah Pengurus Wilayah Lembaga Pendidikan Ma'arif Jateng</h1>
+        <h3>Balai Diklat Keagamaan Semarang - Dr. H. Mutadi, S. Pd., M. Ed. - WhatsApp 082137312000</h3>
+    </header>
+
+    <!-- Link Navigasi -->
+
+
+<a href="https://www.canva.com/design/DAGhL8nfFFo/qpeEjcZ7wCMNaCQR2Ctdyw/edit?utm_content=DAGhL8nfFFo&utm_campaign=designshare&utm_medium=link2&utm_source=sharebuttonf" target="_blank" class="link-bar">01. Presentasi MKKS </a>
+    <a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/presentasiMKKS.pdf" target="_blank" class="link-bar">02. Presentasi MKKS Kemendikbud Ristek</a>
+    <a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/Panduan%20Operasional%20MKKS.pdf" target="_blank" class="link-bar">03. Panduan Operasional MKKS</a>
+    <a href="https://docs.google.com/spreadsheets/d/1f9H0dHp4mXUs-ZcdxDooNfnTpQdQXBYY/edit?usp=sharing&ouid=106284183132720458695&rtpof=true&sd=true" target="_blank" class="link-bar">04. Tugas Evaluasi Diri MKKS Kemendikbud</a>
+
+<a href="
+https://docs.google.com/spreadsheets/d/1H5xMFNVjExa9q89DffH89wf_tHSDWMgs/edit?usp=sharing&ouid=106284183132720458695&rtpof=true&sd=true" target="_blank" class="link-bar">05. Contoh Hasil EDMKKS Kamad MI</a>
+
+    <a href="https://www.canva.com/design/DAGhA9Zs9gQ/242LLuAz7h-zLeWnx9z9EQ/edit?utm_content=DAGhA9Zs9gQ&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" target="_blank" class="link-bar">06. Presentasi Learning Ecosystem</a>
+    <a href="https://drive.google.com/drive/folders/1BriMUpf0CPsivCdN3yiW0vsip_fQkxzD?usp=sharing" target="_blank" class="link-bar">07. Materi Learning Ecosystem</a>
+    <a href="https://drive.google.com/drive/folders/1H0ZLeXFL21tRJZCVGCfP-VrqZSHcQ8NK?usp=sharing" target="_blank" class="link-bar">08. Tugas Learning Ecosystem</a>
+    <a href="https://www.canva.com/design/DAGhFIjVwQ4/y_a4xWZUTvT_0mORc_KO8A/edit?utm_content=DAGhFIjVwQ4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" target="_blank" class="link-bar">09. Presentasi Literasi Digital TPACK</a>
+    <a href="https://drive.google.com/drive/folders/1xQMGpgfaNUcLUFOvlMV-OThbGq5hphQU?usp=sharing" target="_blank" class="link-bar">10. Materi Literasi Digital</a>
+    <a href="https://www.geocities.ws/mutadi/deep_learning/pdf%20files/desain%20Pembelajaran%20Mat.%20Mat%20-%20Mutadi.pdf" target="_blank" class="link-bar">11. Tugas Literasi Digital TPACK</a>
+    <a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/Petunjuk%20Video.pdf" target="_blank" class="link-bar">12. Petunjuk dan Tugas Best Practice</a>
+    <a href="https://www.youtube.com/watch?v=hqTPSp7Tm2M" target="_blank" class="link-bar">13. Video MI Wahid Hasyim Yogyakarta</a>
+<a href="https://www.youtube.com/watch?v=kCIHbFF89XI" target="_blank" class="link-bar">14. Video MTs TechnoNatuna Depok</a>
+<a href="https://www.youtube.com/watch?v=U51K5SnyrfQ" target="_blank" class="link-bar">15. Video MAN 2 Malang</a>
+    <a href="https://www.geocities.ws/mutadi/deep_learning/home.html" target="_blank" class="link-bar">16. Website Deep Learning</a>
+<a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/silabus.pdf" target="_blank" class="link-bar">17. Silabus Pelatihan Kepala Madrasah</a>
+<a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/jadwal%20senin.pdf
+" target="_blank" class="link-bar">18. Jadwal Senin (Kompetensi) 14.00 - 17.15</a>
+<a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/jadwal%20selasa%20kamis.pdf
+" target="_blank" class="link-bar">19. Jadwal Selasa (Ekosistem) 13.15 - 16.30</a>
+<a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/jadwal%20rabu.pdf" target="_blank" class="link-bar">20. Jadwal Rabu (Video) 12.30 - 15.30</a>
+<a href="https://www.geocities.ws/mrteddy/latsama/PDF%20Files/jadwal%20selasa%20kamis.pdf
+" target="_blank" class="link-bar">21. Jadwal Kamis (Digital) 08.00 - 11.15</a>
+</body>
+</html>
