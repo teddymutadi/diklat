@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Login</title>
+    <style>
+        /* Mengatur font dasar dan reset margin */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Latar belakang halaman (Opsional, agar kotak ungu terlihat menonjol) */
+        body {
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Kotak utama berwarna ungu gelap */
+        .main-container {
+            background-color: #2D2150; /* Warna ungu sesuai gambar */
+            width: 800px;
+            height: 450px;
+            border-radius: 20px;
+            display: flex;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        /* Sisi Kiri (Teks dan Logo) */
+        .left-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding-right: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Tempat Logo */
+        .logo-placeholder {
+            width: 250px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .title-text {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle-text {
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        /* Teks di pojok kiri bawah */
+        .footer-text {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            font-size: 11px;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        /* Sisi Kanan (Form Login) */
+        .right-section {
+            width: 320px;
+            background-color: #F5F6F8;
+            border-radius: 15px;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            color: #2D2150;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* Form Input */
+        .input-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 25px; /* Membuat ujungnya bulat */
+            border: 1px solid #ccc;
+            background-color: transparent;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #2D2150;
+        }
+
+        /* Tombol Login */
+        .login-btn {
+            background-color: #F1323B; /* Warna merah */
+            color: white;
+            border: none;
+            padding: 10px 40px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: #d12730;
+        }
+
+        /* Responsif untuk layar HP */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                width: 95%;
+                height: auto;
+                padding: 20px;
+            }
+            .right-section {
+                width: 100%;
+                margin-top: 30px;
+            }
+            .footer-text {
+                position: relative;
+                bottom: 0;
+                margin-top: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- BAGIAN KIRI -->
+        <div class="left-section">
+            <!-- Ganti atribut src di bawah ini jika Anda punya file gambar logo aslinya -->
+            <!-- Contoh: <img src="logo.png" class="logo-placeholder"> -->
+            <img src="https://teddymutadi.github.io/diklat/hebatpng.png" alt="Logo Madrasah Hebat" class="logo-placeholder" style="filter: drop-shadow(2px 4px 6px black);">
+            
+            <div class="title-text">PELATIHAN PENGUATAN KEPALA MADRASAH</div>
+            <div class="subtitle-text">MOU ANTARA KKMI PATI DAN BDK SEMARANG</div>
+
+            <div class="footer-text">
+                Hotel Pati<br>
+                Pati, 5 - 9 Oktober 2026
+            </div>
+        </div>
+
+        <!-- BAGIAN KANAN (FORM LOGIN) -->
+        <div class="right-section">
+            <h2 class="login-title">Login</h2>
+            
+            <form id="loginForm" style="width: 100%; text-align: center;">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="User Name" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- PROGRAM LOGIKA JAVASCRIPT -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Mencegah halaman refresh saat klik tombol
+
+            // Mengambil nilai inputan
+            var user = document.getElementById('username').value;
+            var pass = document.getElementById('password').value;
+
+            // ==========================================================
+            // PENGATURAN USERNAME DAN PASSWORD
+            // Silakan ganti 'admin' dan '12345' sesuai keinginan Anda
+            // ==========================================================
+            if (user === 'admin' && pass === '12345678') {
+                
+                alert('Login Berhasil!');
+                
+                // ==========================================================
+                // PETUNJUK: PASTE URL TUJUAN ANDA DI BAWAH INI
+                // Ganti tulisan "https://www.google.com" dengan URL tujuan Anda
+                // Pastikan URL tetap diapit oleh tanda kutip ('...')
+                // ==========================================================
+                
+                window.location.href = 'https://script.google.com/macros/s/AKfycbxBBDgDdwHF2eAM92FdyQk-yk-M5nvEBddRfacImw-BKXZ0eHbnkhvE9G24VtjyOvN_Rg/exec'; 
+
+            } else {
+                // Pesan jika login salah
+                alert('User Name atau Password salah!');
+            }
+        });
+    </script>
+
+</body>
+</html>
