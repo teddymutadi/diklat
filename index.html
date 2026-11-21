@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NUTRIMETRON - Smart Tool for Menu Design</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Poppins:wght@300;400;600&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Nunito:wght@400;700&family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&family=Raleway:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--em:#10b981;--emd:#047857;--or:#f97316;--grad:linear-gradient(135deg,#10b981,#0ea5e9,#6366f1,#f97316);--tx:#1f2937}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:Poppins,sans-serif;color:var(--tx);background:#fff;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-weight:600;font-size:14px;min-height:42px}
+input,select,textarea{font-family:inherit;font-size:15px;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:10px;width:100%;background:#fff;min-height:42px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--em);border-color:var(--em)}
+label{font-size:13px;font-weight:600;display:block;margin:10px 0 4px}
+.b-red{background:#dc2626;color:#fff}.b-green{background:#16a34a;color:#fff}.b-em{background:var(--em);color:#fff}.b-or{background:var(--or);color:#fff}.b-gray{background:#e5e7eb;color:#111}
+.hidden{display:none!important}
+
+/* ===== WELCOME ===== */
+#welcome{position:fixed;inset:0;overflow:hidden;background:linear-gradient(135deg,#06b6d4,#10b981,#6366f1,#f97316,#ec4899);background-size:400% 400%;animation:gshift 14s ease infinite;display:flex;flex-direction:column;align-items:center;padding:2vh 3vw;color:#fff;z-index:50}
+@keyframes gshift{0%{background-position:0 0}50%{background-position:100% 100%}100%{background-position:0 0}}
+.waves{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.waves i{position:absolute;inset:0;background-repeat:repeat;opacity:.5}
+.waves i:nth-child(1){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='160' viewBox='0 0 600 160'%3E%3Cpath d='M0 80 Q150 10 300 80 T600 80 V160 H0Z' fill='rgba(255,255,255,0.14)'/%3E%3C/svg%3E");animation:wv1 16s linear infinite}
+.waves i:nth-child(2){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'%3E%3Cpath d='M0 100 Q200 20 400 100 T800 100 V200 H0Z' fill='rgba(255,255,255,0.12)'/%3E%3C/svg%3E");animation:wv2 24s linear infinite}
+.waves i:nth-child(3){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='120' viewBox='0 0 400 120'%3E%3Cpath d='M0 60 Q100 0 200 60 T400 60 V120 H0Z' fill='rgba(255,255,255,0.10)'/%3E%3C/svg%3E");animation:wv3 11s linear infinite}
+@keyframes wv1{to{background-position:600px 320px}}
+@keyframes wv2{to{background-position:800px 400px}}
+@keyframes wv3{to{background-position:400px 240px}}
+.w-head{position:relative;text-align:center;z-index:2}
+.w-head h1{margin:0;font-family:Montserrat;font-weight:800;font-size:clamp(20px,4.2vw,44px);letter-spacing:1px}
+.w-head h2{margin:2px 0;font-weight:400;font-size:clamp(12px,2vw,20px)}
+.w-head h3{margin:0;font-weight:600;font-size:clamp(12px,1.8vw,18px)}
+.w-body{position:relative;z-index:2;flex:1;min-height:0;width:100%;max-width:1400px;display:flex;align-items:center;justify-content:space-around;gap:2vw;flex-wrap:nowrap}
+.w-body .wimg{width:min(600px,44vw,62vh);height:min(600px,44vw,62vh);object-fit:contain;animation:updown 3.2s ease-in-out infinite;filter:drop-shadow(0 18px 24px rgba(0,0,0,.3))}
+@keyframes updown{0%,100%{transform:translateY(-14px)}50%{transform:translateY(14px)}}
+.login{background:rgba(255,255,255,.18);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.5);border-radius:18px;padding:18px 20px;width:min(380px,46vw);color:#fff;max-height:100%}
+.login h4{margin:0 0 6px;font-size:20px;text-align:center}
+.login .radios{display:flex;gap:18px;justify-content:center;margin:6px 0}
+.login .radios label{display:flex;align-items:center;gap:6px;margin:0;font-size:15px}
+.login .radios input{width:auto;min-height:0}
+.login input[type=text],.login input[type=email],.login input[type=password]{background:#fff;color:#111}
+.login input::placeholder{color:transparent}
+.login button{width:100%;margin-top:14px;background:var(--or);color:#fff;font-size:16px}
+#lmsg{margin-top:8px;font-size:13px;min-height:18px;background:rgba(0,0,0,.25);border-radius:8px;padding:0 8px}
+@media(max-width:820px){
+ #welcome{padding:1.2vh 4vw}
+ .w-body{flex-direction:column;justify-content:center;gap:1vh}
+ .w-body .wimg{width:min(36vh,70vw);height:min(36vh,70vw)}
+ .login{width:min(420px,92vw);padding:12px 14px}
+ .login input{padding:7px 10px;min-height:36px}.login label{margin:5px 0 2px}
+}
+
+/* ===== TOPBAR ===== */
+#topbar{position:sticky;top:0;z-index:40;height:56px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+#hamb{background:var(--em);color:#fff;width:44px;padding:0;font-size:22px}
+.brand{font-family:Montserrat;font-weight:800;color:var(--emd);font-size:17px;margin-right:auto;white-space:nowrap}
+.brand b{color:var(--or)}
+#topbar .tabs{display:flex;gap:6px}
+.tab{background:#f3f4f6;color:#374151;padding:8px 12px;min-height:38px;font-size:13px}
+.tab.on{background:var(--em);color:#fff}
+.tab:nth-child(2).on{background:var(--or)}
+#whoami{font-size:12px;color:#6b7280;display:none}
+@media(min-width:900px){#whoami{display:block}}
+@media(max-width:620px){.brand{display:none}#topbar .tabs{margin-right:auto}.tab{padding:8px 9px;font-size:12px}}
+
+/* ===== HEADER ===== */
+#hero{position:relative;overflow:hidden;min-height:calc(100vh - 56px);background:var(--grad);background-size:300% 300%;animation:hshift 12s ease infinite;color:#fff;display:flex;align-items:center}
+@keyframes hshift{0%{background-position:0 0}50%{background-position:100% 100%}100%{background-position:0 0}}
+#rain{position:absolute;inset:0;width:100%;height:100%;opacity:.4;pointer-events:none}
+.hero-in{position:relative;z-index:2;width:100%;display:flex;align-items:center;gap:2vw;padding:3vh 3vw}
+.hero-l{flex:0 0 65%;max-width:65%;text-align:left}
+.hero-r{flex:1;display:flex;justify-content:center;min-width:0}
+#hTitle{margin:0 0 14px;line-height:1.05;font-weight:800;word-break:break-word}
+#hTitle .cur{display:inline-block;width:.07em;height:.9em;background:#fff;margin-left:6px;vertical-align:-.08em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+#hSub1{margin:0 0 14px;line-height:1.6;text-align:left}
+#hSub2{margin:0;font-style:normal;text-align:left;opacity:.95}
+#hImg{max-width:100%;height:auto;aspect-ratio:1/1;object-fit:contain;animation:updown 3.2s ease-in-out infinite;filter:drop-shadow(0 16px 22px rgba(0,0,0,.3))}
+@media(max-width:820px){.hero-in{flex-direction:column;padding:4vh 4vw}.hero-l{flex:none;max-width:100%}.hero-r{flex:none;width:100%}#hImg{max-width:70%}}
+
+/* ===== KONTEN ===== */
+#content{padding:24px 1cm;max-width:100%}
+@media(max-width:700px){#content{padding:16px 12px}}
+.page{display:none}.page.on{display:block}
+.page h2.pt{font-family:Montserrat;font-size:clamp(22px,4vw,32px);margin:6px 0 14px;color:var(--emd);border-left:6px solid var(--or);padding-left:12px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin:18px 0;box-shadow:0 4px 14px rgba(16,185,129,.07)}
+.card h3{margin:0 0 10px;color:var(--emd);font-size:19px}
+.card:nth-of-type(even) h3{color:#c2410c}
+.card p{line-height:1.75;text-align:justify;margin:8px 0}
+.vid{position:relative;width:100%;max-width:1280px;aspect-ratio:16/9;margin:12px auto}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #d1fae5;padding:8px 10px;text-align:left;font-size:14px;vertical-align:top;word-break:break-word}
+th{background:var(--em);color:#fff}
+tbody tr:nth-child(even){background:#f0fdf4}
+.tdiet td:first-child{font-weight:600;color:#c2410c}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
+.res{background:#ecfdf5;border:1.5px solid var(--em);border-radius:14px;padding:12px 14px;margin-top:12px}
+.res b{color:var(--emd)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.formula{background:#fff7ed;border-left:5px solid var(--or);padding:10px 14px;border-radius:8px;font-weight:600;margin:10px 0}
+#mapwrap{position:relative}
+#map{height:min(480px,65vh);border-radius:14px;z-index:1}
+#provSel{position:absolute;top:10px;right:10px;z-index:1000;width:min(290px,62%);box-shadow:0 3px 10px rgba(0,0,0,.3)}
+#mapText{margin-top:10px;min-height:260px;line-height:1.7;resize:vertical}
+.sec3{border-top:5px solid var(--em)}.sec3.o{border-top-color:var(--or)}
+.mt{margin:14px 0}.mt h4{margin:0 0 6px;color:#fff;background:var(--em);padding:8px 12px;border-radius:10px 10px 0 0;font-size:15px}
+.mt:nth-of-type(even) h4{background:var(--or)}
+.rt td.act{white-space:normal}
+.rt .act button{padding:5px 8px;min-height:30px;font-size:12px;margin:1px}
+.rt tr.sub td{background:#d1fae5;font-weight:700}
+.rt tr.saved td:first-child{border-left:4px solid var(--em)}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-weight:700;font-size:12px}
+.ok{background:#d1fae5;color:#065f46}.bad{background:#ffedd5;color:#9a3412}
+@media(max-width:768px){
+ .rt thead{display:none}
+ .rt,.rt tbody{display:block;width:100%}
+ .rt tr{display:block;border:1px solid #a7f3d0;border-radius:12px;margin:8px 0;padding:6px;background:#fff!important}
+ .rt td{display:flex;justify-content:space-between;gap:10px;border:0;padding:4px 6px;text-align:right}
+ .rt td::before{content:attr(data-label);font-weight:600;color:var(--emd);text-align:left}
+ .rt td.act{flex-wrap:wrap;justify-content:flex-start}.rt td.act::before{width:100%}
+}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;padding:12px}
+#modal.on{display:flex}
+.mbox{background:#fff;border-radius:16px;padding:18px;width:min(560px,100%);max-height:94vh;overflow:auto;border-top:6px solid var(--or)}
+.mbox h3{margin:0 0 4px;color:var(--emd)}
+.thick{border:3px solid var(--em);border-radius:12px;padding:8px 12px;margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:#f0fdf4}
+.thick label{display:flex;align-items:center;gap:6px;margin:0}.thick input{width:auto;min-height:0}
+.calcbox{background:#fff7ed;border:1.5px solid var(--or);border-radius:12px;padding:10px;margin-top:10px;font-size:14px;line-height:1.7}
+/* drawer */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:none}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(360px,92vw);background:#fff;z-index:70;transform:translateX(-102%);transition:transform .25s;overflow:auto;padding:16px;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+#drawer.on{transform:none}#overlay.on{display:block}
+#drawer h3{margin:4px 0 8px;color:var(--emd)}
+#drawer details{border:1px solid #d1fae5;border-radius:12px;padding:8px 12px;margin:10px 0}
+#drawer summary{font-weight:700;cursor:pointer;color:#c2410c}
+.navl{display:block;width:100%;text-align:left;background:#f0fdf4;color:var(--emd);margin:5px 0}
+.crow{display:flex;gap:6px;align-items:center;margin:5px 0}.crow input[type=color]{width:56px;padding:2px;min-height:38px}
+.crow button{padding:4px 10px;min-height:34px}
+/* footer */
+footer{background:var(--grad);background-size:300% 300%;animation:hshift 12s ease infinite;color:#fff;text-align:center;padding:22px 12px;margin-top:30px;white-space:pre-line;font-weight:600}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:10px;z-index:200;display:none;max-width:90vw;font-size:14px}
+.leaflet-container{font-family:Poppins,sans-serif}
+</style>
+</head>
+<body>
+
+<!-- ================= WELCOME ================= -->
+<div id="welcome">
+  <div class="waves"><i></i><i></i><i></i></div>
+  <div class="w-head">
+    <h1>SELAMAT DATANG DI NUTRIMETRON</h1>
+    <h2>Nutrimetron is a Smart Tool for Menu Design</h2>
+    <h3>Poltekkes Semarang</h3>
+  </div>
+  <div class="w-body">
+    <img id="wImg" class="wimg" src="https://teddymutadi.github.io/manajemen/nutrimetron.png" alt="Nutrimetron">
+    <div class="login">
+      <h4>LOGIN</h4>
+      <div class="radios">
+        <label><input type="radio" name="role" value="user" checked> User</label>
+        <label><input type="radio" name="role" value="admin"> Admin</label>
+      </div>
+      <div id="fUser">
+        <label>Masukkan Nama Anda:</label><input type="text" id="uNama" autocomplete="off">
+        <label>Masukkan e-mail Anda:</label><input type="email" id="uEmail" autocomplete="off">
+      </div>
+      <div id="fAdmin" class="hidden">
+        <label>Masukkan Username:</label><input type="text" id="aUser" autocomplete="off">
+        <label>Masukkan password:</label><input type="password" id="aPass" autocomplete="off">
+      </div>
+      <button id="btnLogin">LOGIN</button>
+      <div id="lmsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+  <div id="topbar">
+    <button id="hamb" class="hidden" aria-label="Menu">&#9776;</button>
+    <div class="brand">NUTRI<b>METRON</b></div>
+    <div class="tabs">
+      <button class="tab on" data-p="1">Nutrition Education</button>
+      <button class="tab" data-p="2">IMT</button>
+      <button class="tab" data-p="3">Nutrimetron</button>
+    </div>
+    <span id="whoami"></span>
+    <button class="b-gray" id="btnLogout" style="min-height:38px;padding:6px 12px">Keluar</button>
+  </div>
+
+  <header id="hero">
+    <canvas id="rain"></canvas>
+    <div class="hero-in">
+      <div class="hero-l">
+        <h1 id="hTitle"><span id="typed"></span><span class="cur"></span></h1>
+        <p id="hSub1"></p>
+        <p id="hSub2"></p>
+      </div>
+      <div class="hero-r"><img id="hImg" alt="Nutrimetron"></div>
+    </div>
+  </header>
+
+  <main id="content">
+  <!-- ========== PAGE 1 ========== -->
+  <section class="page on" id="p1">
+    <h2 class="pt">Nutrition Education</h2>
+    <div class="card">
+      <h3>MATERI: GIZI SEIMBANG</h3>
+      <p>Gizi seimbang adalah susunan pangan sehari-hari yang mengandung zat gizi dalam jenis dan jumlah yang sesuai dengan kebutuhan tubuh, dengan memperhatikan prinsip keanekaragaman pangan, aktivitas fisik, perilaku hidup bersih, dan pemantauan berat badan secara teratur untuk mempertahankan berat badan normal.</p>
+      <p>Pedoman Gizi Seimbang Kementerian Kesehatan RI divisualisasikan dalam "Isi Piringku": setengah piring berisi sayur dan buah, setengah lainnya berisi makanan pokok dan lauk-pauk. Porsi sayur dan makanan pokok lebih besar dibandingkan buah dan lauk. Pembatasan konsumsi gula, garam, dan lemak (anjuran G4 G1 L5: gula 4 sendok makan, garam 1 sendok teh, lemak 5 sendok makan per hari) membantu mencegah penyakit tidak menular seperti diabetes, hipertensi, dan penyakit jantung.</p>
+      <p>Keseimbangan zat gizi makro (karbohidrat, protein, lemak) dan zat gizi mikro (vitamin dan mineral) diperlukan agar tubuh dapat tumbuh, bergerak, dan terlindungi dari penyakit. Kekurangan maupun kelebihan gizi sama-sama menimbulkan masalah kesehatan, sehingga kebutuhan gizi setiap orang perlu dihitung sesuai usia, jenis kelamin, tinggi badan, berat badan, dan tingkat aktivitas fisik.</p>
+      <h3 style="margin-top:16px">VIDEO 1</h3>
+      <div class="vid"><iframe width="1280" height="720" src="https://www.youtube.com/embed/1bcI39ssaaw?si=2sfF6uFZUWj_ATBJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    </div>
+
+    <div class="card">
+      <h3>MATERI: JENIS DIET</h3>
+      <p>Diet adalah pengaturan jumlah, jenis, dan jadwal pemberian makanan untuk tujuan tertentu, seperti menjaga kesehatan, membantu penyembuhan penyakit, atau mencapai berat badan ideal. Di rumah sakit, diet disesuaikan dengan kondisi klinis dan kemampuan pasien mengonsumsi makanan, sehingga terapi gizi menjadi bagian penting dari proses penyembuhan.</p>
+      <p>Jenis diet dapat dikelompokkan berdasarkan konsistensi (bentuk dan tekstur makanan), kandungan zat gizi tertentu (energi, protein, lemak, serat), serta jenis penyakit yang diderita. Pemilihan diet yang tepat dilakukan oleh dokter bersama ahli gizi setelah melakukan pengkajian status gizi dan pemeriksaan penunjang.</p>
+      <p>Berikut ringkasan jenis diet yang umum digunakan dalam pelayanan gizi:</p>
+      <table class="tdiet"><thead><tr><th>Kelompok</th><th>Jenis Diet</th><th>Ciri Utama</th></tr></thead><tbody>
+        <tr><td>Konsistensi</td><td>Makanan Biasa</td><td>Pasien tanpa gangguan khusus</td></tr>
+        <tr><td>Konsistensi</td><td>Makanan Lunak</td><td>Tekstur lunak, mudah dikunyah dan dicerna; untuk gangguan mengunyah atau pasca operasi</td></tr>
+        <tr><td>Konsistensi</td><td>Makanan Saring</td><td>Makanan dihaluskan dan disaring, rendah serat</td></tr>
+        <tr><td>Konsistensi</td><td>Makanan Cair</td><td>Berbentuk cair, mudah ditelan dan dicerna; untuk kondisi akut atau pasca operasi tertentu</td></tr>
+        <tr><td>Zat gizi</td><td>Diet Rendah Energi</td><td>Membatasi kalori untuk penurunan berat badan atau obesitas</td></tr>
+        <tr><td>Zat gizi</td><td>Diet Tinggi Energi Tinggi Protein (TETP)</td><td>Untuk malnutrisi, luka bakar, dan masa penyembuhan</td></tr>
+        <tr><td>Zat gizi</td><td>Diet Rendah Protein</td><td>Membatasi protein, umumnya pada penyakit ginjal</td></tr>
+        <tr><td>Zat gizi</td><td>Diet Rendah Lemak</td><td>Untuk gangguan hati, kantung empedu, dan pankreas</td></tr>
+        <tr><td>Zat gizi</td><td>Diet Tinggi Serat</td><td>Memperlancar pencernaan, misalnya pada konstipasi</td></tr>
+        <tr><td>Penyakit</td><td>Diet Diabetes Melitus</td><td>Mengatur jumlah, jenis, dan jadwal makan untuk mengendalikan gula darah</td></tr>
+        <tr><td>Penyakit</td><td>Diet Jantung</td><td>Rendah lemak jenuh, kolesterol, dan garam</td></tr>
+        <tr><td>Penyakit</td><td>Diet Rendah Garam</td><td>Membatasi natrium pada hipertensi dan edema</td></tr>
+        <tr><td>Penyakit</td><td>Diet Rendah Purin</td><td>Membatasi bahan tinggi purin pada asam urat</td></tr>
+        <tr><td>Khusus</td><td>Diet Vegetarian</td><td>Berbasis tumbuhan; perlu perhatian pada vitamin B12, zat besi, dan protein</td></tr>
+      </tbody></table>
+      <h3 style="margin-top:16px">VIDEO 2</h3>
+      <div class="vid"><iframe width="1280" height="720" src="https://www.youtube.com/embed/x0HVA938D00?si=MYJwmea6c0_D4i9c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    </div>
+
+    <div class="card">
+      <h3>MAKANAN LOKAL</h3>
+      <p>Makanan lokal adalah makanan khas suatu daerah yang dibuat dari bahan pangan setempat dengan cara pengolahan turun-temurun. Indonesia memiliki ribuan ragam makanan lokal, mulai dari rendang di Sumatera Barat, gudeg di Yogyakarta, rawon di Jawa Timur, hingga papeda di Maluku dan Papua. Setiap hidangan mencerminkan budaya, kondisi alam, dan kearifan masyarakat daerah asalnya.</p>
+      <p>Dari sisi gizi, makanan lokal umumnya kaya sumber karbohidrat (beras, jagung, sagu, singkong), protein hewani (ikan, ayam, daging) dan nabati (tempe, tahu, kacang-kacangan), serta sayur dan rempah yang mengandung vitamin, mineral, dan antioksidan. Memanfaatkan pangan lokal membantu menganekaragamkan menu, menekan biaya, dan mendukung petani serta nelayan setempat.</p>
+      <h3 style="margin-top:16px">PETA DAERAH DAN MAKANAN LOKAL</h3>
+      <p style="text-align:left">Klik penanda ibu kota provinsi pada peta atau pilih provinsi pada menu di kanan atas peta untuk membaca makanan tradisional dan kandungan gizinya.</p>
+      <div id="mapwrap"><select id="provSel" aria-label="Pilih provinsi"></select><div id="map"></div></div>
+      <textarea id="mapText" readonly></textarea>
+      <p style="text-align:left;font-size:13px"><a id="gmapLink" target="_blank" rel="noopener">Buka lokasi ini di Google Maps</a></p>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 2 ========== -->
+  <section class="page" id="p2">
+    <h2 class="pt">Indeks Massa Tubuh (IMT)</h2>
+    <div class="card">
+      <p>Indeks Massa Tubuh (IMT) atau Body Mass Index (BMI) adalah ukuran sederhana untuk menilai apakah berat badan seseorang sesuai dengan tinggi badannya. IMT digunakan sebagai alat skrining status gizi pada orang dewasa (usia 18 tahun ke atas).</p>
+      <h3>Rumus:</h3>
+      <div class="formula">IMT = Berat Badan (kg) ÷ [Tinggi Badan (m)]²</div>
+      <p>Artinya, berat badan dalam kilogram dibagi dengan tinggi badan dalam meter yang dikuadratkan (tinggi × tinggi). Satuan IMT adalah kg/m². Jika tinggi badan diukur dalam sentimeter, ubah dulu ke meter dengan membaginya 100. Misalnya, 165 cm = 1,65 m.</p>
+      <h3>Langkah-langkah Perhitungan</h3>
+      <p>Ukur berat badan (kg) dan tinggi badan (cm). Ubah tinggi badan ke meter (cm ÷ 100). Kuadratkan tinggi badan (tinggi × tinggi). Bagi berat badan dengan hasil kuadrat tersebut. Cocokkan hasilnya dengan tabel kategori.</p>
+      <h3>Kategori Indeks Massa Tubuh (IMT)</h3>
+      <p>Index Massa Tubuh (IMT) menurut data World Health Organization (WHO) dapat disajikan dalam tabel berikut ini:</p>
+      <table><thead><tr><th>IMT (kg/m²)</th><th>Kategori</th></tr></thead><tbody>
+        <tr><td>&lt; 18,5</td><td>Berat Badan Kurang</td></tr><tr><td>18,5 – 24,9</td><td>Normal</td></tr>
+        <tr><td>25,0 – 29,9</td><td>Overweight</td></tr><tr><td>≥ 30,0</td><td>Obesitas</td></tr></tbody></table>
+      <p>Sementara, Index Massa Tubuh (IMT) menurut Kemenkes RI disajikan dalam tabel berikut ini:</p>
+      <table><thead><tr><th>IMT (kg/m²)</th><th>Kategori</th></tr></thead><tbody>
+        <tr><td>&lt; 17,0</td><td>Underweight Berat</td></tr><tr><td>17,0 – 18,4</td><td>Underweight Ringan</td></tr>
+        <tr><td>18,5 – 25,0</td><td>Normal</td></tr><tr><td>25,1 – 27,0</td><td>Obesitas</td></tr><tr><td>&gt; 27,0</td><td>Overweight</td></tr></tbody></table>
+      <h3 style="margin-top:16px">Menghitung Berat Badan Ideal Menggunakan Rumus Broca</h3>
+      <p>Berat Badan Ideal (BBI) dengan Rumus Broca merupakan metode sederhana untuk memperkirakan berat badan ideal seseorang berdasarkan tinggi badan. Rumus Broca dibedakan berdasarkan jenis kelamin. Untuk laki-laki, BBI = (Tinggi Badan – 100) – 10% × (Tinggi Badan – 100). Sementara itu, untuk perempuan, BBI = (Tinggi Badan – 100) – 15% × (Tinggi Badan – 100). Tinggi badan dihitung dalam satuan sentimeter dan hasil berat badan dalam kilogram. Contohnya, perempuan dengan tinggi 160 cm memiliki BBI sekitar 51 kg. Perhitungan ini bersifat perkiraan dan bukan satu-satunya indikator untuk menentukan status gizi seseorang.</p>
+    </div>
+    <div class="card sec3 o">
+      <h3>KALKULATOR IMT &amp; BBI</h3>
+      <div class="grid3">
+        <div><label>Nama</label><input id="i_nama"></div>
+        <div><label>Jenis Kelamin</label><select id="i_jk"><option>Laki-laki</option><option>Perempuan</option></select></div>
+        <div><label>Umur (tahun)</label><input id="i_umur" type="number" min="0" inputmode="decimal"></div>
+        <div><label>Berat Badan (kg)</label><input id="i_bb" type="number" min="0" step="0.1" inputmode="decimal"></div>
+        <div><label>Tinggi Badan (cm)</label><input id="i_tb" type="number" min="0" step="0.1" inputmode="decimal"></div>
+      </div>
+      <div class="btns"><button class="b-em" id="i_hit">HITUNG</button></div>
+      <div class="res hidden" id="i_out"></div>
+      <div class="btns"><button class="b-red" id="i_pdf">DOWNLOAD PDF</button><button class="b-green" id="i_reset">RESET</button></div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 3 ========== -->
+  <section class="page" id="p3">
+    <h2 class="pt">Nutrimetron</h2>
+
+    <!-- APLIKASI 1 -->
+    <div class="card sec3">
+      <h3>APLIKASI 1 - PERHITUNGAN KEBUTUHAN GIZI</h3>
+      <div class="grid3">
+        <div><label>Nama</label><input id="a1_nama"></div>
+        <div><label>Jenis Kelamin</label><select id="a1_jk"><option>Laki-laki</option><option>Perempuan</option></select></div>
+        <div><label>Usia (tahun)</label><input id="a1_usia" type="number" min="0" inputmode="decimal"></div>
+        <div><label>Tinggi Badan (cm)</label><input id="a1_tb" type="number" min="0" step="0.1" inputmode="decimal"></div>
+        <div><label>Berat Badan (kg)</label><input id="a1_bb" type="number" min="0" step="0.1" inputmode="decimal"></div>
+        <div><label>Faktor Aktivitas</label><select id="a1_fa">
+          <option value="1.2">1,2 - Sangat ringan (tirah baring / duduk)</option>
+          <option value="1.375">1,375 - Ringan</option>
+          <option value="1.55" selected>1,55 - Sedang</option>
+          <option value="1.725">1,725 - Berat</option>
+          <option value="1.9">1,9 - Sangat berat</option></select></div>
+      </div>
+      <div class="btns"><button class="b-em" id="a1_hit">HITUNG</button></div>
+      <div class="res hidden" id="a1_out"></div>
+      <div class="btns"><button class="b-red" id="a1_pdf">DOWNLOAD PDF</button><button class="b-green" id="a1_reset">RESET APP 1</button></div>
+    </div>
+
+    <!-- APLIKASI 2 -->
+    <div class="card sec3 o">
+      <h3>APLIKASI 2 - PENYUSUNAN MENU MAKANAN</h3>
+      <div class="res" id="a2_info"></div>
+      <div id="a2_tables"></div>
+      <div class="btns"><button class="b-em" id="a2_saveall">SIMPAN SEMUA</button><button class="b-red" id="a2_pdf">DOWNLOAD PDF</button><button class="b-green" id="a2_reset">RESET APP 2</button></div>
+    </div>
+
+    <!-- APLIKASI 3 -->
+    <div class="card sec3">
+      <h3>APLIKASI 3 - PERSENTASE KECUKUPAN</h3>
+      <div class="btns" style="margin-top:0"><button class="b-em" id="a3_hit">PERBARUI</button></div>
+      <div id="a3_out"></div>
+      <div class="btns"><button class="b-red" id="a3_pdf">DOWNLOAD PDF</button><button class="b-green" id="a3_reset">RESET APP 3</button></div>
+    </div>
+  </section>
+  </main>
+
+  <footer id="footer"></footer>
+</div>
+
+<!-- ============ MODAL KOTAK INPUT ============ -->
+<div id="modal"><div class="mbox">
+  <h3>KOTAK INPUT</h3><div id="mSub" style="font-size:13px;color:#6b7280"></div>
+  <label>Menu (boleh dikosongkan)</label><input id="m_menu" placeholder="">
+  <label>Berat (gram)</label><input id="m_berat" type="number" min="0" step="0.1" inputmode="decimal">
+  <label>Kadar Kandungan Zat Gizi</label>
+  <select id="m_src"><option value="">-- pilih --</option><option>TKPI</option><option>USDA</option></select>
+  <div id="m_sheetW" class="hidden"><label>Sheet name</label><select id="m_sheet"></select></div>
+  <div id="m_kodeW" class="hidden"><label>Kode dan Nama Bahan</label>
+    <input id="m_filter" placeholder="" style="margin-bottom:6px"><select id="m_kode"></select></div>
+  <div id="m_load" style="font-size:13px;color:#9a3412"></div>
+  <div class="calcbox hidden" id="m_prev"></div>
+  <div class="thick hidden" id="m_nh"><b>Penempatan protein:</b>
+    <label><input type="radio" name="pnh" value="N" checked> Nabati (N)</label>
+    <label><input type="radio" name="pnh" value="H"> Hewani (H)</label></div>
+  <div class="calcbox hidden" id="m_calc"></div>
+  <div class="btns"><button class="b-green" id="m_send">KIRIM</button><button class="b-gray" id="m_cancel">BATAL</button></div>
+</div></div>
+
+<!-- ============ DRAWER (ADMIN) ============ -->
+<div id="overlay"></div>
+<aside id="drawer">
+  <h3>Menu</h3>
+  <button class="navl" data-go="1">Nutrition Education</button>
+  <button class="navl" data-go="2">Indeks Massa Tubuh</button>
+  <button class="navl" data-go="3">Nutrimetron</button>
+  <details open><summary>Setting Header</summary>
+    <label>Warna gradasi (minimal 2)</label><div id="colorList"></div>
+    <button class="b-gray" id="addColor" style="margin-top:6px">+ Tambah warna</button>
+    <label>URL gambar header</label><input id="s_img">
+    <label>Ukuran gambar (px, lebar = tinggi)</label><input id="s_imgSize" type="number" min="100" max="900">
+    <label>Judul</label><input id="s_title">
+    <label>Sub judul 1</label><textarea id="s_sub1" rows="5"></textarea>
+    <label>Sub judul 2</label><textarea id="s_sub2" rows="2"></textarea>
+    <label>Jenis font judul</label><select id="s_fTitle"></select>
+    <label>Ukuran font judul (px)</label><input id="s_sTitle" type="number" min="20" max="120">
+    <label>Jenis font sub judul</label><select id="s_fSub"></select>
+    <label>Ukuran font sub judul (px)</label><input id="s_sSub" type="number" min="10" max="30">
+  </details>
+  <details><summary>Setting Footer</summary>
+    <label>Teks footer</label><textarea id="s_footer" rows="3"></textarea>
+  </details>
+  <div class="btns"><button class="b-em" id="s_save">SIMPAN PENGATURAN</button><button class="b-gray" id="s_def">KEMBALI KE DEFAULT</button></div>
+  <div id="s_msg" style="font-size:13px;margin-top:8px"></div>
+</aside>
+<div id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+/* ======================================================================
+   KONFIGURASI: tempel URL Web App Apps Script (berakhiran /exec) di bawah
+   ====================================================================== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbw8lCABZySrgPUuprpyDGrg42Z-3aaIGEzCas8uOxqeEw_akLYl3DNCyrkPz56EPY8h9A/exec';
+
+const $ = id => document.getElementById(id);
+const f1 = n => (isFinite(n) ? Number(n).toFixed(1) : '0.0');
+const toast = (m, ms = 3000) => { const t = $('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = 'none', ms); };
+
+async function api(action, data) {
+  if (!API_URL || API_URL.indexOf('PASTE') === 0) throw new Error('API_URL belum diisi di index.html');
+  const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action }, data || {})) });
+  return r.json();
+}
+
+/* ============================ SETTINGS ============================ */
+const FONTS = ['Montserrat', 'Poppins', 'Roboto', 'Open Sans', 'Lato', 'Nunito', 'Playfair Display', 'Merriweather', 'Raleway', 'Inter', 'Arial', 'Georgia', 'Verdana', 'Tahoma', 'Trebuchet MS'];
+const DEF = {
+  colors: ['#10b981', '#0ea5e9', '#6366f1', '#f97316'],
+  img: 'https://teddymutadi.github.io/manajemen/nutrimetron.png', imgSize: 600,
+  title: 'NUTRIMETRON',
+  sub1: 'NUTRIMETRON merupakan aplikasi cerdas untuk menyusun menu makan harian yang meliputi makan pagi, siang, dan malam berdasarkan kebutuhan nutrisi individu. Penyusunan menu diawali dengan perhitungan Indeks Massa Tubuh (IMT), kemudian dipadukan dengan tabel penyusunan menu, kandungan gizi setiap bahan makanan, serta formula perhitungan nutrisi yang kompleks. Melalui integrasi tersebut, NUTRIMETRON menghasilkan rekomendasi komposisi makanan dan takaran kalori yang sesuai dengan kebutuhan tubuh seseorang.',
+  sub2: 'Dibuat dengan penuh cinta oleh: Muhammad Iqbal Muhtada (Mahasiswa Poltekkes Semarang)',
+  fTitle: 'Montserrat', fSub: 'Poppins', sTitle: 64, sSub: 16,
+  footer: '©2026 – Muhammad Iqbal Muhtada\nMahasiswa Poltekkes Semarang'
+};
+let S = JSON.parse(JSON.stringify(DEF));
+let typeTimer = null;
+
+function applySettings() {
+  const cs = (S.colors && S.colors.length >= 2) ? S.colors : DEF.colors;
+  document.documentElement.style.setProperty('--grad', 'linear-gradient(135deg,' + cs.join(',') + ')');
+  $('hImg').src = S.img; $('hImg').style.width = Math.min(+S.imgSize || 600, 900) + 'px';
+  $('hSub1').textContent = S.sub1; $('hSub2').textContent = S.sub2;
+  $('hTitle').style.fontFamily = `'${S.fTitle}',sans-serif`;
+  $('hTitle').style.fontSize = `min(${+S.sTitle || 64}px, 11vw)`;
+  [$('hSub1'), $('hSub2')].forEach(e => { e.style.fontFamily = `'${S.fSub}',sans-serif`; e.style.fontSize = `min(${+S.sSub || 16}px, 4.4vw)`; });
+  $('footer').textContent = S.footer;
+  if (S.img) $('wImg').src = S.img;
+  typeTitle();
+}
+function typeTitle() {
+  clearInterval(typeTimer); const el = $('typed'); el.textContent = ''; let i = 0; const t = S.title || '';
+  typeTimer = setInterval(() => { el.textContent = t.slice(0, ++i); if (i >= t.length) clearInterval(typeTimer); }, 130);
+}
+async function loadSettings() {
+  try { const r = await api('getSettings'); if (r.ok && r.settings) Object.keys(r.settings).forEach(k => { if (r.settings[k] !== '' && r.settings[k] != null) S[k] = r.settings[k]; }); } catch (e) { }
+  applySettings();
+}
+function fillSettingsForm() {
+  const cl = $('colorList'); cl.innerHTML = '';
+  S.colors.forEach((c, i) => {
+    const d = document.createElement('div'); d.className = 'crow';
+    d.innerHTML = `<input type="color" value="${c}"><input value="${c}" style="flex:1"><button class="b-gray">×</button>`;
+    const [pk, tx, rm] = d.children;
+    pk.oninput = () => { tx.value = pk.value; S.colors[i] = pk.value; applySettings(); };
+    tx.onchange = () => { if (/^#[0-9a-f]{6}$/i.test(tx.value)) { pk.value = tx.value; S.colors[i] = tx.value; applySettings(); } };
+    rm.onclick = () => { if (S.colors.length > 2) { S.colors.splice(i, 1); fillSettingsForm(); applySettings(); } else toast('Minimal 2 warna'); };
+    cl.appendChild(d);
+  });
+  $('s_img').value = S.img; $('s_imgSize').value = S.imgSize; $('s_title').value = S.title; $('s_sub1').value = S.sub1; $('s_sub2').value = S.sub2;
+  $('s_fTitle').value = S.fTitle; $('s_sTitle').value = S.sTitle; $('s_fSub').value = S.fSub; $('s_sSub').value = S.sSub; $('s_footer').value = S.footer;
+}
+function readSettingsForm() {
+  S.img = $('s_img').value.trim() || DEF.img; S.imgSize = +$('s_imgSize').value || 600; S.title = $('s_title').value; S.sub1 = $('s_sub1').value; S.sub2 = $('s_sub2').value;
+  S.fTitle = $('s_fTitle').value; S.sTitle = +$('s_sTitle').value || 64; S.fSub = $('s_fSub').value; S.sSub = +$('s_sSub').value || 16; S.footer = $('s_footer').value;
+}
+
+/* ============================ LOGIN ============================ */
+let session = null;
+document.querySelectorAll('input[name=role]').forEach(r => r.onchange = () => {
+  const a = document.querySelector('input[name=role]:checked').value === 'admin';
+  $('fAdmin').classList.toggle('hidden', !a); $('fUser').classList.toggle('hidden', a); $('lmsg').textContent = '';
+});
+$('btnLogin').onclick = async () => {
+  const role = document.querySelector('input[name=role]:checked').value, m = $('lmsg'), b = $('btnLogin');
+  let payload;
+  if (role === 'admin') {
+    payload = { role, username: $('aUser').value.trim(), password: $('aPass').value };
+    if (!payload.username || !payload.password) { m.textContent = 'Username dan password wajib diisi'; return; }
+  } else {
+    payload = { role, nama: $('uNama').value.trim(), email: $('uEmail').value.trim() };
+    if (!payload.nama || !payload.email) { m.textContent = 'Nama dan e-mail wajib diisi'; return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(payload.email)) { m.textContent = 'Format e-mail tidak valid'; return; }
+  }
+  b.disabled = true; m.textContent = 'Memproses...';
+  try {
+    const r = await api('login', payload);
+    if (!r.ok) { m.textContent = r.error || 'Login gagal'; b.disabled = false; return; }
+    session = { role: r.role, name: role === 'admin' ? 'Admin' : payload.nama, u: payload.username, p: payload.password };
+    enterApp();
+  } catch (e) {
+    if (role === 'user') { session = { role: 'user', name: payload.nama }; enterApp(); toast('Mode offline: data login tidak tersimpan ke spreadsheet (' + e.message + ')', 6000); }
+    else m.textContent = 'Tidak dapat terhubung ke server: ' + e.message;
+  }
+  b.disabled = false;
+};
+function enterApp() {
+  $('welcome').classList.add('hidden'); $('app').classList.remove('hidden');
+  const adm = session.role === 'admin';
+  $('hamb').classList.toggle('hidden', !adm);
+  $('whoami').textContent = (adm ? 'Admin' : 'User') + ': ' + session.name;
+  if (adm) fillSettingsForm();
+  applySettings(); showPage(1); startRain(); initMap(); renderAll();
+  window.scrollTo(0, 0);
+}
+$('btnLogout').onclick = () => { session = null; closeDrawer(); $('app').classList.add('hidden'); $('welcome').classList.remove('hidden'); $('aPass').value = ''; $('lmsg').textContent = ''; };
+
+/* ============================ NAV / DRAWER ============================ */
+function showPage(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p' + n));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.p == n));
+  const top = $('hero').offsetHeight + 56 - 56; if (window.scrollY < top) window.scrollTo({ top: top, behavior: 'smooth' });
+  if (n === 1 && map) setTimeout(() => map.invalidateSize(), 120);
+  if (n === 3) renderA3();
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => showPage(+t.dataset.p));
+function closeDrawer() { $('drawer').classList.remove('on'); $('overlay').classList.remove('on'); }
+$('hamb').onclick = () => { if (!session || session.role !== 'admin') return; $('drawer').classList.add('on'); $('overlay').classList.add('on'); };
+$('overlay').onclick = closeDrawer;
+document.querySelectorAll('.navl').forEach(b => b.onclick = () => { showPage(+b.dataset.go); closeDrawer(); });
+FONTS.forEach(f => { ['s_fTitle', 's_fSub'].forEach(id => { const o = document.createElement('option'); o.value = o.textContent = f; o.style.fontFamily = f; $(id).appendChild(o); }); });
+$('addColor').onclick = () => { S.colors.push('#ec4899'); fillSettingsForm(); applySettings(); };
+['s_img', 's_imgSize', 's_title', 's_sub1', 's_sub2', 's_fTitle', 's_sTitle', 's_fSub', 's_sSub', 's_footer'].forEach(id => $(id).addEventListener('input', () => { readSettingsForm(); const keepT = S.title; applySettings(); }));
+$('s_save').onclick = async () => {
+  readSettingsForm(); applySettings(); const m = $('s_msg'); m.textContent = 'Menyimpan...';
+  try { const r = await api('saveSettings', { username: session.u, password: session.p, settings: S }); m.textContent = r.ok ? '✅ Pengaturan tersimpan di spreadsheet' : '⚠ ' + r.error; }
+  catch (e) { m.textContent = '⚠ Gagal terhubung: ' + e.message; }
+};
+$('s_def').onclick = () => { S = JSON.parse(JSON.stringify(DEF)); fillSettingsForm(); applySettings(); $('s_msg').textContent = 'Default dipulihkan. Klik SIMPAN untuk menyimpan.'; };
+
+/* ============================ CODE RAIN (header) ============================ */
+let rainOn = false;
+function startRain() {
+  if (rainOn) return; rainOn = true;
+  const cv = $('rain'), cx = cv.getContext('2d'), chars = '01{}<>/;=()[]+*#$%&'.split(''), fs = 16; let cols, ys;
+  function size() { cv.width = cv.clientWidth; cv.height = cv.clientHeight; cols = Math.ceil(cv.width / fs); ys = Array.from({ length: cols }, () => Math.random() * cv.height); }
+  size(); window.addEventListener('resize', size);
+  setInterval(() => {
+    cx.globalCompositeOperation = 'destination-out'; cx.fillStyle = 'rgba(0,0,0,0.08)'; cx.fillRect(0, 0, cv.width, cv.height);
+    cx.globalCompositeOperation = 'source-over'; cx.fillStyle = 'rgba(255,255,255,0.9)'; cx.font = fs + 'px monospace';
+    for (let i = 0; i < cols; i++) {
+      cx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fs, ys[i]);
+      ys[i] -= fs; if (ys[i] < -20 && Math.random() > 0.96) ys[i] = cv.height + 20; else if (ys[i] < -20) ys[i] = -20 + 0 * 1;
+      if (ys[i] <= -20) ys[i] = cv.height + Math.random() * 200;
+    }
+  }, 110);
+}
+
+/* ============================ PETA & MAKANAN LOKAL ============================ */
+// [provinsi, ibu kota, lat, lng, makanan, deskripsi, ciri gizi, kkal, protein, lemak, sumber karbohidrat]
+const P = [
+['Aceh','Banda Aceh',5.55,95.32,'mie Aceh','Mi kuning tebal dimasak dengan bumbu kari, cabai, bawang, dan rempah, dengan tambahan daging sapi, kambing, atau seafood.','karbohidrat dari mi, protein dari daging atau seafood, serta antioksidan dari rempah','450–650','20–30','15–28','mi kuning'],
+['Sumatera Utara','Medan',3.59,98.67,'soto Medan','Soto berkuah santan gurih berbahan daging atau ayam, bumbu rempah, serta pelengkap perkedel, telur, dan emping.','protein hewani, lemak dari santan, serta mineral dan antioksidan dari rempah','300–450','18–28','15–25','nasi atau lontong pendamping'],
+['Sumatera Barat','Padang',-0.95,100.35,'rendang','Daging sapi dimasak lama dengan santan dan bumbu cabai, bawang, jahe, lengkuas, kunyit, dan serai hingga kuahnya mengering.','protein, zat besi, dan seng dari daging serta lemak dari santan','195–350','20–30','10–25','nasi putih pendamping'],
+['Riau','Pekanbaru',0.51,101.45,'gulai patin','Ikan patin dimasak dengan kuah santan kuning berbumbu kunyit, lengkuas, serai, dan cabai.','protein ikan, asam lemak tak jenuh, serta vitamin dari bumbu','200–320','18–25','10–20','nasi pendamping'],
+['Kepulauan Riau','Tanjungpinang',0.92,104.45,'gonggong','Siput laut gonggong direbus lalu disantap dengan sambal asam pedas dari cabai, bawang, dan jeruk limau.','protein, zat besi, dan mineral laut yang rendah lemak','80–150','15–22','1–4','nasi atau lontong pendamping'],
+['Jambi','Jambi',-1.61,103.61,'pindang patin','Ikan patin dalam kuah asam pedas segar dengan tomat, nanas, daun kemangi, dan cabai.','protein ikan serta vitamin C dari tomat dan nanas','150–250','17–24','6–14','nasi pendamping'],
+['Sumatera Selatan','Palembang',-2.98,104.76,'pempek','Adonan ikan tenggiri dan sagu digoreng atau direbus, disantap dengan cuko dari gula merah, cabai, dan bawang putih.','protein ikan dan karbohidrat dari sagu','200–300','8–14','2–10','tepung sagu dan tapioka'],
+['Bengkulu','Bengkulu',-3.80,102.26,'pendap','Ikan atau daging dibumbui kelapa parut dan rempah, dibungkus daun talas atau daun keladi, lalu dikukus atau dipanggang.','protein, lemak dari kelapa, dan serat dari daun','180–300','14–22','10–20','nasi pendamping'],
+['Lampung','Bandar Lampung',-5.43,105.26,'seruit','Ikan bakar atau goreng dihaluskan bersama sambal terasi, tempoyak, dan tomat, disantap bersama lalapan.','protein ikan serta serat dan vitamin dari lalapan','180–300','16–24','6–14','nasi pendamping'],
+['Kepulauan Bangka Belitung','Pangkalpinang',-2.13,106.11,'lempah kuning','Ikan atau udang dimasak dalam kuah kunyit asam berisi nanas dan terong tanpa santan.','protein ikan, vitamin C, dan antioksidan kunyit','120–220','15–22','4–10','nasi pendamping'],
+['Banten','Serang',-6.12,106.15,'sate bandeng','Daging ikan bandeng dihaluskan bersama bumbu, dimasukkan kembali ke kulitnya, lalu dipanggang.','protein ikan dan asam lemak omega-3','180–280','18–26','8–16','nasi pendamping'],
+['DKI Jakarta','Jakarta',-6.21,106.85,'soto Betawi','Soto berkuah santan atau susu berisi potongan daging sapi, jeroan, kentang, dan tomat.','protein hewani dan lemak dari santan atau susu','350–500','18–28','18–30','nasi pendamping'],
+['Jawa Barat','Bandung',-6.92,107.61,'nasi timbel','Nasi pulen dibungkus daun pisang disajikan dengan ayam goreng, tahu, tempe, sambal, dan lalapan.','protein hewani dan nabati serta serat dari lalapan','550–750','22–32','18–30','nasi'],
+['Jawa Tengah','Semarang',-6.97,110.42,'garang asem','','','','','',''],
+['DI Yogyakarta','Yogyakarta',-7.80,110.36,'gudeg','Nangka muda dimasak lama dengan santan dan gula kelapa, disajikan bersama telur, ayam, krecek, dan sambal.','serat dari nangka, protein dari telur dan ayam, serta lemak dari santan','350–550','14–24','12–25','nasi putih'],
+['Jawa Timur','Surabaya',-7.25,112.75,'rawon','Sup daging sapi berkuah hitam dari kluwek dengan bumbu bawang, kunyit, dan serai, disajikan dengan tauge dan telur asin.','protein dan zat besi dari daging serta lemak tak jenuh dari kluwek','300–450','22–32','10–20','nasi pendamping'],
+['Bali','Denpasar',-8.65,115.22,'ayam betutu','Ayam utuh diisi dan dilumuri base genep (bumbu lengkap) lalu dibungkus daun pisang dan dimasak lama.','protein ayam serta antioksidan dari rempah','250–400','24–34','12–22','nasi pendamping'],
+['Nusa Tenggara Barat','Mataram',-8.58,116.12,'ayam taliwang','Ayam kampung muda dibakar dengan bumbu cabai, bawang putih, dan terasi khas Lombok.','protein ayam dan kapsaisin dari cabai','250–380','24–32','12–20','nasi pendamping'],
+['Nusa Tenggara Timur','Kupang',-10.18,123.60,"se'i",'Daging sapi atau babi diasap dengan kayu kosambi lalu disajikan dengan sambal lu’at dan daun singkong.','protein, zat besi, serta vitamin A dari daun singkong','250–400','25–35','10–22','nasi jagung atau ubi'],
+['Kalimantan Barat','Pontianak',-0.03,109.33,'bubur pedas','Bubur beras dengan aneka sayuran, kacang, ikan teri, dan rempah.','karbohidrat, serat sayur, dan mineral dari ikan teri','250–380','8–14','5–12','beras'],
+['Kalimantan Tengah','Palangka Raya',-2.21,113.92,'juhu umbut rotan','Sayur umbut rotan dimasak dengan ikan dan bumbu sederhana.','serat dari umbut rotan dan protein dari ikan','120–220','12–20','4–12','nasi pendamping'],
+['Kalimantan Selatan','Banjarmasin',-3.32,114.59,'soto Banjar','Soto kuah bening kekuningan berbumbu kayu manis dan cengkih, dengan ayam, telur, dan perkedel.','protein ayam dan telur serta antioksidan rempah','300–450','18–28','8–18','nasi atau ketupat'],
+['Kalimantan Timur','Samarinda',-0.50,117.15,'gence ruan','Ikan gabus dimasak dengan kuah asam pedas berbumbu kemangi dan tomat.','protein ikan gabus dan vitamin dari sayuran','150–250','18–26','4–12','nasi pendamping'],
+['Kalimantan Utara','Tanjung Selor',2.84,117.37,'kepiting soka','Kepiting lunak yang digoreng tepung atau ditumis dengan bumbu pedas.','protein, kalsium, dan mineral seperti seng','200–320','18–26','8–16','tepung pelapis'],
+['Sulawesi Utara','Manado',1.47,124.84,'tinutuan','Bubur beras dengan labu kuning, jagung, bayam, kangkung, dan kemangi (bubur Manado).','serat, vitamin A dari labu, serta mineral dari sayuran','150–280','4–8','2–6','beras, jagung, dan labu'],
+['Gorontalo','Gorontalo',0.54,123.06,'binte biluhuta','Sup jagung manis dengan udang atau ikan, kelapa parut, dan perasan jeruk nipis.','serat jagung, protein udang, dan vitamin C dari jeruk nipis','150–260','8–14','4–10','jagung'],
+['Sulawesi Tengah','Palu',-0.90,119.87,'kaledo','Sup tulang sapi dan sumsum berkuah asam pedas dari asam jawa dan cabai.','protein, kolagen, dan lemak sumsum','300–450','20–30','15–28','nasi atau singkong pendamping'],
+['Sulawesi Barat','Mamuju',-2.68,118.89,'jepa','Olahan singkong kukus berbentuk bulat yang disantap bersama ikan bakar dan sambal.','karbohidrat dari singkong dan protein dari ikan','300–450','15–24','4–12','singkong'],
+['Sulawesi Selatan','Makassar',-5.15,119.43,'coto Makassar','Sup daging dan jeroan sapi berkuah kental dengan kacang tanah sangrai dan rempah, disantap dengan ketupat.','protein hewani serta lemak dari kacang dan daging','350–500','20–30','14–26','ketupat'],
+['Sulawesi Tenggara','Kendari',-3.97,122.51,'sinonggi','Olahan sagu yang kenyal disantap bersama kuah ikan asam pedas dan sayuran.','karbohidrat sagu, protein ikan, dan vitamin dari sayur','250–380','10–18','2–8','sagu'],
+['Maluku','Ambon',-3.70,128.18,'papeda ikan kuah kuning','Bubur sagu kenyal disajikan dengan ikan berkuah kuning berbumbu kunyit, jeruk nipis, dan kemangi.','karbohidrat sagu, protein ikan, dan antioksidan kunyit','250–380','15–24','2–8','sagu'],
+['Maluku Utara','Sofifi',0.74,127.57,'gohu ikan','Ikan tuna segar dipotong dadu, dibumbui jeruk, cabai, dan kemangi (seperti sashimi lokal).','protein tinggi, omega-3, dan vitamin C','110–200','20–28','1–6','pendamping ubi atau pisang rebus'],
+['Papua','Jayapura',-2.53,140.72,'papeda','Bubur sagu bening kenyal disantap bersama ikan kuah kuning.','karbohidrat sagu dan protein ikan','250–350','12–20','2–8','sagu'],
+['Papua Barat','Manokwari',-0.86,134.06,'ikan bakar manokwari','Ikan laut segar dibakar dengan bumbu sederhana, disajikan dengan sambal dabu-dabu dan ubi.','protein ikan, omega-3, serta karbohidrat dari ubi','250–400','22–32','6–14','ubi jalar'],
+['Papua Barat Daya','Sorong',-0.88,131.26,'ikan kuah kuning Sorong','Ikan laut berkuah kuning dari kunyit, jeruk nipis, dan cabai.','protein ikan serta antioksidan kunyit','150–260','16–24','4–12','sagu atau nasi pendamping'],
+['Papua Selatan','Merauke',-8.47,140.33,'sagu lempeng','Sagu dipanggang dalam cetakan tanah liat, disantap dengan ikan bakar atau sayur.','karbohidrat sagu dan protein dari ikan','280–400','8–16','2–8','sagu'],
+['Papua Tengah','Nabire',-3.36,135.49,'ikan bakar dan ubi','Ikan danau atau laut yang dibakar disantap dengan ubi jalar dan sayur daun.','protein ikan, karbohidrat ubi, dan vitamin A','280–420','18–28','4–12','ubi jalar'],
+['Papua Pegunungan','Wamena',-4.10,138.95,'bakar batu','Ubi jalar, sayur, dan daging yang dimasak di antara batu panas dalam tanah.','karbohidrat ubi, serat sayur, dan protein','300–450','12–22','4–12','ubi jalar']
+];
+const SEMARANG = 'Semarang, ibu kota Provinsi Jawa Tengah, memiliki beragam kuliner tradisional, salah satunya garang asem. Makanan ini berbahan dasar ayam yang dimasak bersama bawang merah, bawang putih, cabai, tomat hijau, belimbing wuluh, dan rempah-rempah. Semua bahan dibungkus daun pisang, kemudian dikukus hingga matang. Garang asem memiliki cita rasa asam, gurih, dan pedas. Selain lezat, makanan ini mengandung protein dari ayam, lemak sebagai sumber energi, serta vitamin C dan antioksidan dari sayuran. Satu porsi mengandung sekitar 200–350 kilokalori, 20–30 gram protein, dan 8–18 gram lemak. Garang asem merupakan warisan kuliner Semarang yang perlu dilestarikan.';
+function provText(p) {
+  if (p[1] === 'Semarang') return SEMARANG;
+  const [prov, cap, , , food, desc, nut, kcal, pr, fat, carb] = p;
+  return `${cap}, ibu kota Provinsi ${prov}, memiliki ragam kuliner tradisional yang kaya, salah satunya ${food}. ${desc} Hidangan ini kerap disajikan dalam acara keluarga maupun perayaan adat dan menjadi bagian dari identitas budaya masyarakat setempat. Dari sisi gizi, ${food} menyediakan ${nut}. Satu porsi rata-rata mengandung sekitar ${kcal} kilokalori, ${pr} gram protein, dan ${fat} gram lemak, sedangkan karbohidratnya berasal dari ${carb}. Nilai tersebut bersifat perkiraan dan dapat berbeda bergantung pada resep, ukuran porsi, dan cara pengolahan. Agar kebutuhan gizi seimbang terpenuhi, ${food} sebaiknya dipadukan dengan sayuran segar, buah, dan air putih yang cukup serta dikonsumsi sesuai porsi. Melestarikan makanan tradisional berarti menjaga warisan budaya sekaligus mendukung pola makan sehat berbasis pangan lokal.`;
+}
+let map = null, markers = [];
+function selectProv(i, fly) {
+  const p = P[i]; $('provSel').value = i; $('mapText').value = provText(p);
+  $('gmapLink').href = 'https://www.google.com/maps/search/?api=1&query=' + p[2] + ',' + p[3]; $('gmapLink').textContent = 'Buka ' + p[1] + ' di Google Maps';
+  if (fly && map) map.flyTo([p[2], p[3]], 8, { duration: 1 });
+  markers.forEach((m, j) => m.setOpacity(j === i ? 1 : 0.65));
+}
+function initMap() {
+  if (map) { setTimeout(() => map.invalidateSize(), 150); return; }
+  const sel = $('provSel'); P.forEach((p, i) => { const o = document.createElement('option'); o.value = i; o.textContent = p[0] + ' – ' + p[1]; sel.appendChild(o); });
+  map = L.map('map', { scrollWheelZoom: false }).setView([-2.5, 118], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 18 }).addTo(map);
+  P.forEach((p, i) => { const m = L.marker([p[2], p[3]]).addTo(map).bindTooltip(p[1]); m.on('click', () => selectProv(i, true)); markers.push(m); });
+  sel.onchange = () => selectProv(+sel.value, true);
+  const sm = P.findIndex(p => p[1] === 'Semarang'); selectProv(sm, false); map.setView([P[sm][2], P[sm][3]], 6);
+  setTimeout(() => map.invalidateSize(), 200);
+}
+
+/* ============================ PDF helper ============================ */
+function newPdf(title, orient) {
+  const { jsPDF } = window.jspdf; const d = new jsPDF({ orientation: orient || 'p', unit: 'mm', format: 'a4' });
+  d.setFontSize(16); d.setTextColor(4, 120, 87); d.text('NUTRIMETRON', 14, 16); d.setFontSize(12); d.setTextColor(0); d.text(title, 14, 23);
+  d.setFontSize(9); d.setTextColor(100); d.text('Dicetak: ' + new Date().toLocaleString('id-ID'), 14, 28); d.setTextColor(0); return d;
+}
+function pdfOK() { if (!window.jspdf || !window.jspdf.jsPDF) { toast('Pustaka PDF belum termuat. Periksa koneksi internet.'); return false; } return true; }
+
+/* ============================ PAGE 2: IMT ============================ */
+let imtRes = null;
+$('i_hit').onclick = () => {
+  const nama = $('i_nama').value.trim(), jk = $('i_jk').value, umur = +$('i_umur').value, bb = +$('i_bb').value, tb = +$('i_tb').value;
+  if (!nama || !(umur > 0) || !(bb > 0) || !(tb > 0)) { toast('Lengkapi semua data dengan angka yang valid'); return; }
+  const imt = bb / Math.pow(tb / 100, 2), base = tb - 100;
+  const noCut = (jk === 'Laki-laki' && tb < 160) || (jk === 'Perempuan' && tb < 150);
+  const bbi = noCut ? base : base - base * (jk === 'Laki-laki' ? 0.10 : 0.15);
+  const who = imt < 18.5 ? 'Berat Badan Kurang' : imt < 25 ? 'Normal' : imt < 30 ? 'Overweight' : 'Obesitas';
+  const kem = imt < 17 ? 'Underweight Berat' : imt < 18.5 ? 'Underweight Ringan' : imt <= 25 ? 'Normal' : imt <= 27 ? 'Obesitas' : 'Overweight';
+  imtRes = { nama, jk, umur, bb, tb, imt, bbi, who, kem, noCut };
+  $('i_out').classList.remove('hidden');
+  $('i_out').innerHTML = `<b>IMT:</b> ${imt.toFixed(2)} kg/m²<br><b>Kategori WHO:</b> ${who} &nbsp;|&nbsp; <b>Kategori Kemenkes:</b> ${kem}<br><b>${jk === 'Laki-laki' ? 'BBI Pria' : 'BBI Wanita'}:</b> ${bbi.toFixed(1)} kg${noCut ? ' <small>(TB di bawah batas, tanpa pengurangan persen)</small>' : ''}`;
+};
+$('i_pdf').onclick = () => {
+  if (!imtRes) { toast('Klik HITUNG terlebih dahulu'); return; } if (!pdfOK()) return;
+  const r = imtRes, d = newPdf('Hasil Perhitungan IMT dan Berat Badan Ideal');
+  d.autoTable({ startY: 33, theme: 'grid', headStyles: { fillColor: [16, 185, 129] }, head: [['Keterangan', 'Nilai']], body: [
+    ['Nama', r.nama], ['Jenis Kelamin', r.jk], ['Umur', r.umur + ' tahun'], ['Berat Badan', r.bb + ' kg'], ['Tinggi Badan', r.tb + ' cm'],
+    ['IMT', r.imt.toFixed(2) + ' kg/m2'], ['Kategori WHO', r.who], ['Kategori Kemenkes', r.kem], [r.jk === 'Laki-laki' ? 'BBI Pria' : 'BBI Wanita', r.bbi.toFixed(1) + ' kg']] });
+  d.save('IMT_BBI_' + r.nama.replace(/\s+/g, '_') + '.pdf');
+};
+$('i_reset').onclick = () => { ['i_nama', 'i_umur', 'i_bb', 'i_tb'].forEach(i => $(i).value = ''); $('i_jk').selectedIndex = 0; $('i_out').classList.add('hidden'); imtRes = null; };
+
+/* ============================ STATE ============================ */
+const MEALS = [['pagi', 'Makan Pagi'], ['snack1', 'Snack Pagi'], ['siang', 'Makan Siang'], ['snack2', 'Snack Siang'], ['malam', 'Makan Malam']];
+const emptyRow = () => ({ menu: '', nama: '', berat: 0, energi: 0, pn: 0, ph: 0, lemak: 0, karbo: 0, saved: false });
+let A1 = null, M = {}, a3Shown = false;
+function initM() { MEALS.forEach(m => M[m[0]] = [emptyRow(), emptyRow()]); }
+function persist() { try { localStorage.setItem('nm_state', JSON.stringify({ A1, M })); } catch (e) { } }
+function restore() { try { const s = JSON.parse(localStorage.getItem('nm_state') || 'null'); if (s) { A1 = s.A1; M = s.M || M; } } catch (e) { } }
+initM(); restore();
+
+/* ============================ APLIKASI 1 ============================ */
+// Mifflin-St Jeor: laki-laki +5, perempuan -161. (Ubah konstanta ini jika ingin selalu +5)
+const REE_CONST = { 'Laki-laki': 5, 'Perempuan': -161 };
+$('a1_hit').onclick = () => {
+  const nama = $('a1_nama').value.trim(), jk = $('a1_jk').value, usia = +$('a1_usia').value, tb = +$('a1_tb').value, bb = +$('a1_bb').value, fa = +$('a1_fa').value;
+  if (!nama || !(usia > 0) || !(tb > 0) || !(bb > 0)) { toast('Lengkapi data dengan angka yang valid'); return; }
+  const ree = 10 * bb + 6.25 * tb - 5 * usia + REE_CONST[jk], tee = ree * fa;
+  A1 = { nama, jk, usia, tb, bb, fa, ree, tee, pK: .15 * tee, fK: .25 * tee, kK: .60 * tee, p: .15 * tee / 4, f: .25 * tee / 9, k: .60 * tee / 4 };
+  persist(); renderA1(); renderA2info(); renderA3(); toast('Perhitungan selesai');
+};
+function renderA1() {
+  const o = $('a1_out');
+  if (!A1) { o.classList.add('hidden'); return; }
+  $('a1_nama').value = A1.nama; $('a1_jk').value = A1.jk; $('a1_usia').value = A1.usia; $('a1_tb').value = A1.tb; $('a1_bb').value = A1.bb; $('a1_fa').value = A1.fa;
+  o.classList.remove('hidden');
+  o.innerHTML = `<b>REE:</b> ${f1(A1.ree)} kkal<br><b>Energi (TEE):</b> ${f1(A1.tee)} kkal<br><b>Protein (15% TEE):</b> ${f1(A1.pK)} kkal ≈ ${f1(A1.p)} g<br><b>Lemak (25% TEE):</b> ${f1(A1.fK)} kkal ≈ ${f1(A1.f)} g<br><b>Karbohidrat (60% TEE):</b> ${f1(A1.kK)} kkal ≈ ${f1(A1.k)} g`;
+}
+$('a1_pdf').onclick = () => {
+  if (!A1) { toast('Klik HITUNG terlebih dahulu'); return; } if (!pdfOK()) return;
+  const d = newPdf('Perhitungan Kebutuhan Gizi');
+  d.autoTable({ startY: 33, theme: 'grid', headStyles: { fillColor: [16, 185, 129] }, head: [['Keterangan', 'Nilai']], body: [
+    ['Nama', A1.nama], ['Jenis Kelamin', A1.jk], ['Usia', A1.usia + ' tahun'], ['Tinggi Badan', A1.tb + ' cm'], ['Berat Badan', A1.bb + ' kg'], ['Faktor Aktivitas', A1.fa],
+    ['REE', f1(A1.ree) + ' kkal'], ['TEE', f1(A1.tee) + ' kkal'], ['Kebutuhan Protein', f1(A1.pK) + ' kkal (' + f1(A1.p) + ' g)'],
+    ['Kebutuhan Lemak', f1(A1.fK) + ' kkal (' + f1(A1.f) + ' g)'], ['Kebutuhan Karbohidrat', f1(A1.kK) + ' kkal (' + f1(A1.k) + ' g)']] });
+  d.save('Kebutuhan_Gizi_' + A1.nama.replace(/\s+/g, '_') + '.pdf');
+};
+$('a1_reset').onclick = () => { A1 = null; ['a1_nama', 'a1_usia', 'a1_tb', 'a1_bb'].forEach(i => $(i).value = ''); $('a1_jk').selectedIndex = 0; $('a1_fa').value = '1.55'; $('a1_out').classList.add('hidden'); persist(); renderA2info(); renderA3(); };
+
+/* ============================ APLIKASI 2 ============================ */
+function renderA2info() {
+  const t = new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' });
+  const a = A1;
+  $('a2_info').innerHTML = `<b>Tanggal penyusunan:</b> <span id="tgl2">${t}</span><br>` + (a ?
+    `<b>Nama:</b> ${a.nama} | <b>Jenis Kelamin:</b> ${a.jk} | <b>Usia:</b> ${a.usia} th<br><b>BB:</b> ${a.bb} kg | <b>TB:</b> ${a.tb} cm<br><b>Energi (TEE):</b> ${f1(a.tee)} kkal | <b>Protein:</b> ${f1(a.p)} g | <b>Lemak:</b> ${f1(a.f)} g | <b>Karbohidrat:</b> ${f1(a.k)} g`
+    : '<i>Data pasien diambil dari hasil Aplikasi 1. Lengkapi dan klik HITUNG pada Aplikasi 1 terlebih dahulu.</i>');
+}
+setInterval(() => { const e = $('tgl2'); if (e) e.textContent = new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }); }, 1000);
+const sumRows = (rows, k) => rows.reduce((s, r) => s + (+r[k] || 0), 0);
+function renderA2() {
+  const wrap = $('a2_tables'); wrap.innerHTML = '';
+  MEALS.forEach(([id, label]) => {
+    const rows = M[id], div = document.createElement('div'); div.className = 'mt';
+    let h = `<h4>${label}</h4><table class="rt"><thead><tr><th rowspan="2">Menu</th><th rowspan="2">Nama Bahan</th><th rowspan="2">Berat (g)</th><th rowspan="2">Energi (kkal)</th><th colspan="2">Protein</th><th rowspan="2">Lemak (g)</th><th rowspan="2">Karbohidrat (g)</th><th rowspan="2">Aksi</th></tr><tr><th>N (g)</th><th>H (g)</th></tr></thead><tbody>`;
+    rows.forEach((r, i) => {
+      h += `<tr class="${r.saved ? 'saved' : ''}"><td data-label="Menu">${esc(r.menu) || '&nbsp;'}</td><td data-label="Nama Bahan">${esc(r.nama) || '&nbsp;'}</td><td data-label="Berat (g)">${r.berat ? f1(r.berat) : ''}</td><td data-label="Energi (kkal)">${r.nama ? f1(r.energi) : ''}</td><td data-label="Protein N (g)">${r.nama ? f1(r.pn) : ''}</td><td data-label="Protein H (g)">${r.nama ? f1(r.ph) : ''}</td><td data-label="Lemak (g)">${r.nama ? f1(r.lemak) : ''}</td><td data-label="Karbohidrat (g)">${r.nama ? f1(r.karbo) : ''}</td>
+      <td class="act" data-label="Aksi"><button class="b-or" data-a="edit" data-m="${id}" data-i="${i}">EDIT</button><button class="b-em" data-a="save" data-m="${id}" data-i="${i}">SIMPAN</button><button class="b-gray" data-a="add" data-m="${id}" data-i="${i}">TAMBAH BARIS</button><button class="b-red" data-a="del" data-m="${id}" data-i="${i}">HAPUS</button></td></tr>`;
+    });
+    h += `<tr class="sub"><td colspan="3" data-label="Sub Total">Sub Total</td><td data-label="Energi (kkal)">${f1(sumRows(rows, 'energi'))}</td><td data-label="Protein N (g)">${f1(sumRows(rows, 'pn'))}</td><td data-label="Protein H (g)">${f1(sumRows(rows, 'ph'))}</td><td data-label="Lemak (g)">${f1(sumRows(rows, 'lemak'))}</td><td data-label="Karbohidrat (g)">${f1(sumRows(rows, 'karbo'))}</td><td></td></tr></tbody></table>`;
+    div.innerHTML = h; wrap.appendChild(div);
+  });
+}
+const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+$('a2_tables').addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return; const m = b.dataset.m, i = +b.dataset.i, a = b.dataset.a;
+  if (a === 'edit') openModal(m, i);
+  else if (a === 'save') { M[m][i].saved = true; persist(); renderA2(); toast('Baris disimpan'); }
+  else if (a === 'add') { M[m].splice(i + 1, 0, emptyRow()); persist(); renderA2(); }
+  else if (a === 'del') { if (M[m].length === 1) M[m][0] = emptyRow(); else M[m].splice(i, 1); persist(); renderA2(); renderA3(); }
+});
+$('a2_saveall').onclick = () => { MEALS.forEach(([id]) => M[id].forEach(r => r.saved = true)); persist(); renderA2(); toast('Semua data menu disimpan'); };
+$('a2_reset').onclick = () => { if (!confirm('Hapus semua data menu?')) return; initM(); persist(); renderA2(); renderA3(); };
+$('a2_pdf').onclick = () => {
+  if (!pdfOK()) return; const d = newPdf('Penyusunan Menu Makanan'); let y = 32;
+  if (A1) { d.setFontSize(9); d.text(`Nama: ${A1.nama} | ${A1.jk} | ${A1.usia} th | BB ${A1.bb} kg | TB ${A1.tb} cm`, 14, y); y += 5; d.text(`TEE ${f1(A1.tee)} kkal | Protein ${f1(A1.p)} g | Lemak ${f1(A1.f)} g | Karbohidrat ${f1(A1.k)} g`, 14, y); y += 3; }
+  MEALS.forEach(([id, label]) => {
+    const rows = M[id].filter(r => r.nama || r.menu);
+    const body = rows.map(r => [r.menu, r.nama, f1(r.berat), f1(r.energi), f1(r.pn), f1(r.ph), f1(r.lemak), f1(r.karbo)]);
+    body.push([{ content: 'Sub Total', colSpan: 3, styles: { fontStyle: 'bold' } }, f1(sumRows(M[id], 'energi')), f1(sumRows(M[id], 'pn')), f1(sumRows(M[id], 'ph')), f1(sumRows(M[id], 'lemak')), f1(sumRows(M[id], 'karbo'))]);
+    d.autoTable({ startY: y + 3, theme: 'grid', styles: { fontSize: 8 }, headStyles: { fillColor: [16, 185, 129] }, head: [[{ content: label, colSpan: 8, styles: { halign: 'left', fillColor: [249, 115, 22] } }], ['Menu', 'Nama Bahan', 'Berat (g)', 'Energi (kkal)', 'Prot N (g)', 'Prot H (g)', 'Lemak (g)', 'Karbo (g)']], body });
+    y = d.lastAutoTable.finalY;
+  });
+  d.save('Menu_Makan' + (A1 ? '_' + A1.nama.replace(/\s+/g, '_') : '') + '.pdf');
+};
+
+/* ---------- KOTAK INPUT ---------- */
+const TKPI = ['serealia', 'umbi_berpati', 'kacang_kacangan', 'sayuran', 'buah', 'daging_unggas', 'ikan', 'telur', 'susu', 'lemak_minyak', 'konfeksioneri', 'bumbu', 'minuman_nonalkohol'];
+const USDA = ['usda1', 'usda2', 'usda3'];
+const foodCache = {}; let cur = null, items = [], item = null, calc = null;
+function openModal(m, i) {
+  cur = { m, i }; const r = M[m][i]; item = null; calc = null; items = [];
+  $('mSub').textContent = MEALS.find(x => x[0] === m)[1] + ' – baris ' + (i + 1);
+  $('m_menu').value = r.menu; $('m_berat').value = r.berat || ''; $('m_src').value = ''; $('m_sheetW').classList.add('hidden'); $('m_kodeW').classList.add('hidden');
+  ['m_prev', 'm_nh', 'm_calc'].forEach(x => $(x).classList.add('hidden')); $('m_load').textContent = ''; $('modal').classList.add('on');
+}
+$('m_cancel').onclick = () => $('modal').classList.remove('on');
+$('m_src').onchange = () => {
+  const v = $('m_src').value, s = $('m_sheet'); s.innerHTML = '<option value="">-- pilih sheet --</option>';
+  $('m_kodeW').classList.add('hidden'); ['m_prev', 'm_nh', 'm_calc'].forEach(x => $(x).classList.add('hidden')); item = null;
+  if (!v) { $('m_sheetW').classList.add('hidden'); return; }
+  (v === 'TKPI' ? TKPI : USDA).forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; s.appendChild(o); });
+  $('m_sheetW').classList.remove('hidden');
+};
+$('m_sheet').onchange = async () => {
+  const sh = $('m_sheet').value, src = $('m_src').value; item = null; ['m_prev', 'm_nh', 'm_calc'].forEach(x => $(x).classList.add('hidden'));
+  if (!sh) { $('m_kodeW').classList.add('hidden'); return; }
+  const key = src + '|' + sh; $('m_load').textContent = 'Memuat data bahan...';
+  try {
+    if (!foodCache[key]) { const r = await api('foodList', { type: src, sheet: sh }); if (!r.ok) throw new Error(r.error); foodCache[key] = r.items; }
+    items = foodCache[key]; $('m_load').textContent = items.length + ' bahan dimuat'; $('m_filter').value = ''; fillKode(''); $('m_kodeW').classList.remove('hidden');
+  } catch (e) { $('m_load').textContent = '⚠ ' + e.message; $('m_kodeW').classList.add('hidden'); }
+};
+function fillKode(q) {
+  const k = $('m_kode'); k.innerHTML = '<option value="">-- pilih kode dan nama bahan --</option>'; q = q.toLowerCase();
+  items.forEach((it, idx) => { const t = it.kode + ' - ' + it.nama; if (!q || t.toLowerCase().includes(q)) { const o = document.createElement('option'); o.value = idx; o.textContent = t; k.appendChild(o); } });
+}
+$('m_filter').oninput = () => fillKode($('m_filter').value);
+$('m_kode').onchange = () => { const v = $('m_kode').value; item = v === '' ? null : items[+v]; showPrev(); };
+$('m_berat').oninput = () => doCalc();
+document.querySelectorAll('input[name=pnh]').forEach(r => r.onchange = doCalc);
+function showPrev() {
+  if (!item) { ['m_prev', 'm_nh', 'm_calc'].forEach(x => $(x).classList.add('hidden')); return; }
+  const sep = item.pn != null || item.ph != null;
+  $('m_prev').classList.remove('hidden');
+  $('m_prev').innerHTML = `<b>Nama Bahan:</b> ${esc(item.nama)}<br><b>Nilai per 100 g →</b> Energi: ${item.energi} | Protein: ${sep ? 'N ' + (item.pn || 0) + ' / H ' + (item.ph || 0) : item.protein} | Lemak: ${item.lemak} | Karbohidrat: ${item.karbo}`;
+  $('m_nh').classList.toggle('hidden', sep); doCalc();
+}
+function doCalc() {
+  const b = +$('m_berat').value || 0; if (!item) return; const sep = item.pn != null || item.ph != null, f = b / 100;
+  let pn = 0, ph = 0;
+  if (sep) { pn = f * (item.pn || 0); ph = f * (item.ph || 0); } else { const pr = f * item.protein; if (document.querySelector('input[name=pnh]:checked').value === 'N') pn = pr; else ph = pr; }
+  calc = { nama: item.nama, energi: f * item.energi, pn, ph, lemak: f * item.lemak, karbo: f * item.karbo };
+  $('m_calc').classList.remove('hidden');
+  $('m_calc').innerHTML = `<b>Hasil perhitungan (Berat ${b} g):</b><br>Energi = (${b}/100) × ${item.energi} = <b>${f1(calc.energi)}</b> kkal<br>Protein N = <b>${f1(pn)}</b> g | Protein H = <b>${f1(ph)}</b> g<br>Lemak = (${b}/100) × ${item.lemak} = <b>${f1(calc.lemak)}</b> g<br>Karbohidrat = (${b}/100) × ${item.karbo} = <b>${f1(calc.karbo)}</b> g`;
+}
+$('m_send').onclick = () => {
+  const b = +$('m_berat').value; if (!item || !calc) { toast('Pilih bahan terlebih dahulu'); return; } if (!(b > 0)) { toast('Isi berat (gram) dengan benar'); return; }
+  doCalc(); const r = M[cur.m][cur.i];
+  Object.assign(r, { menu: $('m_menu').value.trim(), nama: item.kode + ' - ' + calc.nama, berat: b, energi: calc.energi, pn: calc.pn, ph: calc.ph, lemak: calc.lemak, karbo: calc.karbo, saved: false });
+  persist(); $('modal').classList.remove('on'); renderA2(); renderA3(); toast('Data terkirim ke tabel');
+};
+
+/* ============================ APLIKASI 3 ============================ */
+let A3 = null;
+function renderA3() {
+  const o = $('a3_out');
+  if (a3Shown === 'reset') { o.innerHTML = '<p><i>Data dibersihkan. Klik PERBARUI untuk menampilkan ulang.</i></p>'; A3 = null; return; }
+  if (!A1) { o.innerHTML = '<p><i>Lengkapi Aplikasi 1 (REE) terlebih dahulu.</i></p>'; A3 = null; return; }
+  const all = Object.values(M).flat(), T = { e: sumRows(all, 'energi'), p: sumRows(all, 'pn') + sumRows(all, 'ph'), f: sumRows(all, 'lemak'), k: sumRows(all, 'karbo') }, ree = A1.ree;
+  const st = ok => ok ? '<span class="pill ok">Dalam Range</span>' : '<span class="pill bad">Di luar Range</span>';
+  const rows = []; // [nama, total, persentase, rentang, status, ok]
+  const eOK = T.e >= ree - 50 && T.e <= ree + 50;
+  rows.push(['Energi', f1(T.e) + ' kkal', f1(T.e / ree * 100) + '% REE', `${f1(ree - 50)} – ${f1(ree + 50)} kkal (REE ± 50 kkal)`, eOK]);
+  [['Protein', T.p, 4, 15], ['Lemak', T.f, 9, 25], ['Karbohidrat', T.k, 4, 60]].forEach(([n, g, kf, tg]) => {
+    const pct = g * kf / ree * 100, lo = tg - 5, hi = tg + 5, ok = pct >= lo && pct <= hi;
+    rows.push([n, f1(g) + ' g (' + f1(g * kf) + ' kkal)', f1(pct) + '% REE', `${lo}% – ${hi}% REE (${tg}% × REE ± 5%) = ${f1(lo / 100 * ree / kf)} – ${f1(hi / 100 * ree / kf)} g`, ok]);
+  });
+  A3 = { rows, ree, T };
+  let h = `<p><b>REE (dari Aplikasi 1):</b> ${f1(ree)} kkal</p><table class="rt"><thead><tr><th>Zat Gizi</th><th>Total (Aplikasi 2)</th><th>Persentase Kecukupan</th><th>Rentang</th><th>Keterangan</th></tr></thead><tbody>`;
+  rows.forEach(r => h += `<tr><td data-label="Zat Gizi"><b>${r[0]}</b></td><td data-label="Total">${r[1]}</td><td data-label="Persentase">${r[2]}</td><td data-label="Rentang">${r[3]}</td><td data-label="Keterangan">${st(r[4])}</td></tr>`);
+  o.innerHTML = h + '</tbody></table>';
+}
+$('a3_hit').onclick = () => { a3Shown = true; renderA3(); };
+$('a3_reset').onclick = () => { a3Shown = 'reset'; renderA3(); };
+$('a3_pdf').onclick = () => {
+  if (!A3) { toast('Tidak ada data untuk diunduh. Klik PERBARUI.'); return; } if (!pdfOK()) return;
+  const d = newPdf('Persentase Kecukupan'); if (A1) { d.setFontSize(9); d.text(`Nama: ${A1.nama} | REE: ${f1(A1.ree)} kkal`, 14, 32); }
+  d.autoTable({ startY: 36, theme: 'grid', styles: { fontSize: 8 }, headStyles: { fillColor: [16, 185, 129] }, head: [['Zat Gizi', 'Total', 'Persentase', 'Rentang', 'Keterangan']], body: A3.rows.map(r => [r[0], r[1], r[2], r[3], r[4] ? 'Dalam Range' : 'Di luar Range']) });
+  d.save('Persentase_Kecukupan.pdf');
+};
+
+function renderAll() { renderA1(); renderA2info(); renderA2(); a3Shown = a3Shown === 'reset' ? true : a3Shown; renderA3(); }
+
+/* ============================ INIT ============================ */
+(function () { applySettings(); loadSettings(); })();
+</script>
+</body>
+</html>
