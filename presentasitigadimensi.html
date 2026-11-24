@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Presentasi Cube 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --white:#ffffff;
+  --bg:#f6f8f7;
+  --ink:#0f1f1a;
+  --muted:#64748b;
+  --line:#e5ebe8;
+  --orange:#f97316;
+  --orange-d:#ea580c;
+  --orange-l:#fff3e8;
+  --emerald:#10b981;
+  --emerald-d:#059669;
+  --emerald-l:#e7f8f1;
+  --radius:14px;
+  --shadow:0 10px 30px -12px rgba(15,31,26,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 500px at 10% -10%, var(--emerald-l), transparent 60%),
+    radial-gradient(800px 500px at 100% 110%, var(--orange-l), transparent 60%),
+    var(--white);
+  display:flex;flex-direction:column;
+  height:100dvh;overflow:hidden;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid rgba(16,185,129,.45);outline-offset:2px}
+
+/* ---------- Header ---------- */
+.top{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);z-index:20;flex:0 0 auto;
+}
+.top .grp{display:flex;align-items:center;gap:10px;min-width:0}
+.icon-btn{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  background:var(--white);border:1px solid var(--line);transition:.2s;flex:0 0 auto;
+}
+.icon-btn:hover{border-color:var(--emerald);background:var(--emerald-l)}
+.icon-btn svg{width:20px;height:20px;stroke:var(--ink)}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:12px;
+  font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap;
+}
+.chip svg{width:16px;height:16px}
+.chip.timer{background:var(--emerald-l);color:var(--emerald-d)}
+.chip.timer svg{stroke:var(--emerald-d)}
+.chip.count{background:var(--orange-l);color:var(--orange-d)}
+.admin-toggle{
+  height:40px;padding:0 14px;border-radius:12px;font-weight:800;font-size:13px;letter-spacing:.02em;
+  background:var(--ink);color:#fff;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:.2s;
+}
+.admin-toggle:hover{background:#1c3329}
+.admin-toggle .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+.admin-toggle.on{background:var(--emerald);color:#fff}
+.admin-toggle.on .dot{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+
+/* ---------- Stage / Cube ---------- */
+.stage-wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:4px 8px;position:relative}
+.stage{position:relative;width:640px;height:360px;perspective:1400px;perspective-origin:50% 50%}
+.cube{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.face{
+  position:absolute;left:0;top:0;overflow:hidden;background:#fff;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:6px;
+  box-shadow:0 0 0 1px rgba(15,31,26,.08);
+}
+.face img{width:100%;height:100%;object-fit:contain;display:block;background:#fff;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.face .shade{position:absolute;inset:0;background:#06140f;opacity:0;pointer-events:none}
+.floor{
+  position:absolute;left:8%;right:8%;bottom:-20px;height:20px;border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(15,31,26,.28), transparent 70%);
+  filter:blur(6px);pointer-events:none;
+}
+.empty{position:absolute;inset:0;display:none;place-items:center;text-align:center;color:var(--muted);font-weight:600;padding:20px}
+.stage.is-empty .cube{display:none}
+.stage.is-empty .empty{display:grid}
+.loader{
+  position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
+  border:3px solid var(--emerald-l);border-top-color:var(--emerald);animation:spin .8s linear infinite;opacity:0;transition:.2s;pointer-events:none;
+}
+.loader.show{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- Controls ---------- */
+.controls{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:14px;
+  padding:6px 16px 12px;
+}
+.nav{
+  height:44px;padding:0 22px;border-radius:14px;font-weight:800;font-size:15px;
+  display:inline-flex;align-items:center;gap:8px;transition:transform .15s, box-shadow .2s, background .2s;
+  min-width:128px;justify-content:center;
+}
+.nav svg{width:18px;height:18px}
+.nav:active{transform:scale(.97)}
+.nav[disabled]{opacity:.5;cursor:not-allowed}
+.nav.prev{background:#fff;color:var(--emerald-d);border:2px solid var(--emerald)}
+.nav.prev svg{stroke:var(--emerald-d)}
+.nav.prev:hover{background:var(--emerald-l)}
+.nav.next{background:var(--orange);color:#fff;box-shadow:0 10px 22px -10px rgba(249,115,22,.8)}
+.nav.next svg{stroke:#fff}
+.nav.next:hover{background:var(--orange-d)}
+
+/* ---------- Drawer & Panels ---------- */
+.scrim{position:fixed;inset:0;background:rgba(15,31,26,.4);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:.25s;z-index:40}
+.scrim.show{opacity:1;pointer-events:auto}
+.drawer,.sheet{
+  position:fixed;top:0;bottom:0;background:#fff;z-index:50;display:flex;flex-direction:column;
+  width:min(360px,92vw);transition:transform .3s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow);
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+}
+.drawer{left:0;transform:translateX(-105%);border-right:1px solid var(--line)}
+.sheet{right:0;transform:translateX(105%);border-left:1px solid var(--line);width:min(440px,96vw)}
+.drawer.show,.sheet.show{transform:none}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.panel-head h2{font-size:17px;font-weight:800}
+.panel-head p{font-size:12px;color:var(--muted);margin-top:2px}
+.panel-body{flex:1;overflow:auto;padding:16px 18px 24px}
+.menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.btn{
+  height:42px;border-radius:12px;font-weight:700;font-size:13px;padding:0 14px;border:1px solid var(--line);background:#fff;transition:.2s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:hover{border-color:var(--emerald);background:var(--emerald-l)}
+.btn.primary{background:var(--emerald);color:#fff;border-color:var(--emerald)}
+.btn.primary:hover{background:var(--emerald-d)}
+.btn.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+.btn.orange:hover{background:var(--orange-d)}
+.btn.danger{color:#b42318}
+.btn.danger:hover{background:#fef3f2;border-color:#fda29b}
+.btn.full{width:100%}
+.label{font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 8px}
+.thumbs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.thumb{position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--line);aspect-ratio:16/9;background:var(--bg);padding:0;transition:.2s}
+.thumb:hover{border-color:var(--emerald)}
+.thumb.active{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-l)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb span{position:absolute;left:6px;bottom:6px;background:rgba(15,31,26,.78);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px}
+.hint{font-size:12px;color:var(--muted);line-height:1.6}
+.hint kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font:600 11px 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
+
+/* Modal */
+.modal{position:fixed;inset:0;display:none;place-items:center;z-index:60;padding:16px}
+.modal.show{display:grid}
+.card{background:#fff;border-radius:20px;padding:24px;width:min(400px,100%);box-shadow:var(--shadow);border:1px solid var(--line);animation:pop .25s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.card h3{font-size:20px;font-weight:800}
+.card p.sub{font-size:13px;color:var(--muted);margin:4px 0 18px}
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--muted)}
+.field input[type=text],.field input[type=password],.field input[type=url],.field input[type=number],.field textarea{
+  width:100%;height:44px;border-radius:12px;border:1px solid var(--line);padding:0 14px;font:inherit;font-size:14px;background:#fff;transition:.2s
+}
+.field textarea{height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
+.field input:focus,.field textarea:focus{border-color:var(--emerald);outline:3px solid rgba(16,185,129,.2)}
+.error{color:#b42318;font-size:12.5px;font-weight:600;min-height:18px;margin-bottom:8px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+/* Admin */
+details.sec{border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;background:#fff}
+details.sec>summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:800;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:'+';font-size:20px;color:var(--emerald-d);font-weight:700}
+details.sec[open]>summary::after{content:'–'}
+details.sec .inner{padding:2px 16px 16px}
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row input[type=range]{flex:1;accent-color:var(--emerald)}
+.range-row output{min-width:64px;text-align:right;font-weight:800;color:var(--orange-d);font-variant-numeric:tabular-nums}
+.slist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.sitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff}
+.sitem img{width:72px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;background:var(--bg);flex:0 0 auto}
+.sitem .meta{flex:1;min-width:0}
+.sitem .meta b{font-size:12px;display:block}
+.sitem .meta small{font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center;font-size:14px;font-weight:700;transition:.2s}
+.mini:hover{background:var(--emerald-l);border-color:var(--emerald)}
+.mini.del:hover{background:#fef3f2;border-color:#fda29b;color:#b42318}
+.mini[disabled]{opacity:.35;cursor:not-allowed}
+
+.notice{position:fixed;left:50%;top:64px;transform:translate(-50%,-12px);background:#fff7ed;color:#9a3412;border:1px solid #fdba74;padding:10px 16px;border-radius:12px;font-size:12.5px;font-weight:600;max-width:min(560px,92vw);text-align:center;opacity:0;pointer-events:none;transition:.3s;z-index:70;line-height:1.5}
+.notice.show{opacity:1;transform:translate(-50%,0)}
+.warn{background:#fff7ed;border:1px solid #fdba74;color:#9a3412;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.55;font-weight:600;margin-bottom:12px}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;
+  font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:80;max-width:90vw;text-align:center
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Responsive */
+@media (max-width:640px){
+  .top{padding:8px 10px;gap:6px}
+  .chip{padding:0 10px;height:38px;font-size:13px}
+  .icon-btn{width:38px;height:38px}
+  .admin-toggle{height:38px;padding:0 10px;font-size:11.5px}
+  .top .grp{gap:6px}
+  .stage-wrap{padding:2px 4px}
+  .controls{gap:10px;padding:6px 12px 10px}
+  .nav{min-width:0;flex:1;max-width:200px;padding:0 14px;height:44px;font-size:14px}
+}
+@media (max-width:380px){
+  .chip.timer svg{display:none}
+  .admin-toggle .dot{display:none}
+}
+@media (max-height:480px) and (orientation:landscape){
+  .controls{padding:2px 12px 6px}.nav{height:38px}
+  .top{padding:6px 10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .drawer,.sheet,.scrim,.toast{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="grp">
+    <button class="icon-btn" id="burger" aria-label="Buka menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="chip timer" title="Waktu presentasi">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>
+      <span id="timer">00:00</span>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="chip count" title="Slide aktif"><span id="counter">1 / 1</span></div>
+    <button class="admin-toggle" id="adminToggle" aria-pressed="false"><i class="dot"></i><span id="adminLabel">LOGIN ADMIN</span></button>
+  </div>
+</header>
+
+<main class="stage-wrap" id="stageWrap">
+  <div class="stage" id="stage" aria-live="polite">
+    <div class="cube" id="cube"></div>
+    <div class="floor"></div>
+    <div class="empty">Belum ada slide. Masuk sebagai admin untuk menambahkan gambar.</div>
+    <div class="loader" id="loader"></div>
+  </div>
+</main>
+
+<footer class="controls">
+  <button class="nav prev" id="prev">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Previous
+  </button>
+  <button class="nav next" id="next">
+    Next<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+</footer>
+
+<!-- Drawer (hamburger) -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Menu">
+  <div class="panel-head">
+    <div><h2>Daftar slide</h2><p id="drawerSub"></p></div>
+    <button class="icon-btn" data-close aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="panel-body">
+    <div class="menu-actions">
+      <button class="btn" id="fsBtn">Layar penuh</button>
+      <button class="btn" id="resetTimerBtn">Ulang timer</button>
+    </div>
+    <div class="label">Pilih slide</div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="label">Pintasan keyboard</div>
+    <p class="hint"><kbd>→</kbd> / <kbd>Space</kbd> next &nbsp; <kbd>←</kbd> previous &nbsp; <kbd>F</kbd> layar penuh &nbsp; <kbd>Esc</kbd> tutup panel. Di layar sentuh, geser ke kiri atau kanan.</p>
+  </div>
+</aside>
+
+<!-- Login modal -->
+<div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="card">
+    <h3 id="loginTitle">Login admin</h3>
+    <p class="sub">Masuk untuk mengatur transisi, ukuran slide, dan daftar gambar.</p>
+    <label class="field"><span>Username</span><input type="text" id="user" autocomplete="username" autocapitalize="off" spellcheck="false"></label>
+    <label class="field"><span>Password</span><input type="password" id="pass" autocomplete="current-password"></label>
+    <div class="error" id="loginErr"></div>
+    <div class="row">
+      <button class="btn" id="loginCancel">Batal</button>
+      <button class="btn primary" id="loginOk">Masuk</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin sheet -->
+<aside class="sheet" id="sheet" aria-label="Panel admin">
+  <div class="panel-head">
+    <div><h2>Panel admin</h2><p>Perubahan tersimpan otomatis di browser ini.</p></div>
+    <button class="icon-btn" data-close aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="panel-body">
+    <div id="storageWarn" class="warn" style="display:none">Browser ini tidak mengizinkan penyimpanan, jadi perubahan akan hilang saat halaman dimuat ulang. Buka lewat browser biasa (bukan pratinjau), atau gunakan tombol <b>Unduh slides.json</b> di bawah.</div>
+
+    <details class="sec" open>
+      <summary>Tampilan &amp; transisi</summary>
+      <div class="inner">
+        <div class="label">Waktu transisi putaran kubus</div>
+        <div class="range-row"><input type="range" id="durRange" min="300" max="3000" step="50"><output id="durOut"></output></div>
+        <div class="label">Ukuran tampilan slide</div>
+        <div class="range-row"><input type="range" id="sizeRange" min="40" max="100" step="1"><output id="sizeOut"></output></div>
+        <div class="label">Kedalaman 3D (perspektif)</div>
+        <div class="range-row"><input type="range" id="depthRange" min="0" max="40" step="1"><output id="depthOut"></output></div>
+        <button class="btn full" id="resetSettings" style="margin-top:14px">Kembalikan pengaturan awal</button>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Tambah slide</summary>
+      <div class="inner">
+        <label class="field"><span>Satu URL gambar (PNG / JPG)</span><input type="url" id="addOne" placeholder="https://github.com/user/repo/blob/main/41.png"></label>
+        <button class="btn primary full" id="addOneBtn">Tambah slide</button>
+
+        <label class="field" style="margin-top:16px"><span>Banyak URL, satu per baris</span><textarea id="addMany" placeholder="https://.../41.png&#10;https://.../42.png"></textarea></label>
+        <button class="btn primary full" id="addManyBtn">Tambah semua</button>
+
+        <div class="label" style="margin-top:18px">Tambah berdasarkan nomor berurutan</div>
+        <label class="field"><span>Folder dasar</span><input type="text" id="genBase" value="https://github.com/teddymutadi/diklat/blob/main/"></label>
+        <div class="row">
+          <label class="field"><span>Dari</span><input type="number" id="genFrom" value="41" min="0"></label>
+          <label class="field"><span>Sampai</span><input type="number" id="genTo" value="60" min="0"></label>
+          <label class="field"><span>Format</span><input type="text" id="genExt" value="png"></label>
+        </div>
+        <button class="btn orange full" id="genBtn">Buat daftar slide</button>
+        <p class="hint" style="margin-top:10px">URL halaman GitHub (<code>/blob/</code>) otomatis diubah menjadi URL gambar langsung.</p>
+      </div>
+    </details>
+
+    <details class="sec" open>
+      <summary>Daftar slide (<span id="listCount">0</span>)</summary>
+      <div class="inner"><div class="slist" id="slist"></div></div>
+    </details>
+
+    <div class="row">
+      <button class="btn" id="resetSlides">Daftar awal</button>
+      <button class="btn" id="exportBtn">Salin JSON</button>
+    </div>
+    <button class="btn orange full" id="downloadBtn" style="margin-top:12px">Unduh slides.json</button>
+    <p class="hint" style="margin-top:8px">Perubahan di panel ini tersimpan hanya di browser ini. Agar berlaku untuk semua orang, unggah <b>slides.json</b> ke repositori GitHub di folder yang sama dengan index.html.</p>
+    <button class="btn full" id="clearLocalBtn" style="margin-top:10px">Hapus perubahan lokal (ikuti slides.json)</button>
+    <button class="btn danger full" id="logoutBtn" style="margin-top:12px">Keluar dari admin</button>
+  </div>
+</aside>
+
+<div class="notice" id="notice" role="alert"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ================= CONFIG ================= */
+  const ADMIN_USER = '3dkube';
+  const ADMIN_PASS = '12345678';
+  const KEY = 'cube3d.presentation.v1';
+  const RAW = 'https://raw.githubusercontent.com/teddymutadi/diklat/main/';
+  const DEFAULT_SLIDES = [30,31,32,33,34,35,36,37,38,39,40].map(n => RAW + n + '.png');
+  const DEFAULT_SETTINGS = { duration: 1100, size: 100, depth: 22 };
+  const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#f6f8f7"/>' +
+    '<text x="800" y="450" font-family="Arial" font-size="42" font-weight="700" fill="#94a3b8" text-anchor="middle">Gambar tidak dapat dimuat</text>' +
+    '<text x="800" y="505" font-family="Arial" font-size="28" fill="#94a3b8" text-anchor="middle">Periksa koneksi internet atau URL di panel admin</text></svg>');
+
+  /* ================= STATE ================= */
+  let baseSlides = [...DEFAULT_SLIDES], baseSettings = { ...DEFAULT_SETTINGS };
+  let hasLocal = false, storageBad = false;
+  let slides = [...DEFAULT_SLIDES];
+  let settings = { ...DEFAULT_SETTINGS };
+  let idx = 0, busy = false, loggedIn = false;
+  let dims = { w: 640, h: 360 };
+  const $ = id => document.getElementById(id);
+
+  let localData = null, remoteVersion = 0;
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (d && Array.isArray(d.slides) && d.slides.length) localData = d;
+  } catch (e) {}
+  try { loggedIn = sessionStorage.getItem(KEY + '.auth') === '1'; } catch (e) {}
+
+  const save = () => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ slides, settings, baseVersion: remoteVersion }));
+      if (localStorage.getItem(KEY) === null) throw 0;
+      storageBad = false; hasLocal = true;
+    } catch (e) { storageBad = true; }
+    const w = $('storageWarn'); if (w) w.style.display = storageBad ? 'block' : 'none';
+  };
+
+  /* ================= HELPERS ================= */
+  function norm(u) {
+    u = (u || '').trim();
+    const m = u.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(?:blob|raw)\/(.+?)(?:\?.*)?$/i);
+    if (m) return `https://raw.githubusercontent.com/${m[1]}/${m[2]}/${m[3]}`;
+    return u.replace(/\?raw=true$/i, '');
+  }
+  const valid = u => /^https?:\/\//i.test(u) || /\.(png|jpe?g|webp|gif|avif)$/i.test(u);
+  const wrap = i => ((i % slides.length) + slides.length) % slides.length;
+  const src = i => slides[wrap(i)];
+
+  /* ---- Pemuat gambar dengan cadangan alamat ---- */
+  const resolved = new Map();   // url asli -> url yang berhasil dimuat
+  const pending = new Map();
+  function candidates(u) {
+    const list = [u];
+    const m = u.match(/^https:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)$/i);
+    if (m) {
+      list.push(`https://cdn.jsdelivr.net/gh/${m[1]}/${m[2]}@${m[3]}/${m[4]}`);
+      list.push(`https://github.com/${m[1]}/${m[2]}/raw/${m[3]}/${m[4]}`);
+      list.push(`https://media.githubusercontent.com/media/${m[1]}/${m[2]}/${m[3]}/${m[4]}`);
+    }
+    return list;
+  }
+  function tryLoad(url, timeout) {
+    return new Promise(res => {
+      const im = new Image();
+      im.referrerPolicy = 'no-referrer';
+      let done = false;
+      const fin = ok => { if (done) return; done = true; clearTimeout(t); res(ok); };
+      const t = setTimeout(() => fin(false), timeout || 30000);
+      im.onload = () => fin(true);
+      im.onerror = () => fin(false);
+      im.src = url;
+    });
+  }
+  function resolveUrl(u) {
+    if (resolved.has(u)) return Promise.resolve(resolved.get(u));
+    if (pending.has(u)) return pending.get(u);
+    const p = (async () => {
+      for (const c of candidates(u)) {
+        if (await tryLoad(c)) { resolved.set(u, c); return c; }
+      }
+      return null;
+    })().finally(() => pending.delete(u));
+    pending.set(u, p);
+    return p;
+  }
+  // Pasang gambar ke <img>: tampil langsung, ganti ke cadangan bila gagal, placeholder bila semua gagal.
+  function bindImg(im, url) {
+    im.setAttribute('data-u', url);
+    im.referrerPolicy = 'no-referrer';
+    im.src = resolved.get(url) || url;
+    return resolveUrl(url).then(r => {
+      if (im.getAttribute('data-u') !== url) return r;
+      if (r) { if (im.src !== r) im.src = r; }
+      else { im.src = PLACEHOLDER; im.setAttribute('data-u', ''); failed(url); }
+      return r;
+    });
+  }
+  let warned = false;
+  function failed(url) {
+    if (warned) return; warned = true;
+    notice('Gambar tidak dapat dimuat. Jika halaman dibuka dari pratinjau/aplikasi yang membatasi internet, buka lewat browser biasa atau GitHub Pages.');
+  }
+  function notice(msg) {
+    const n = $('notice'); n.textContent = msg; n.classList.add('show');
+    clearTimeout(notice.t); notice.t = setTimeout(() => n.classList.remove('show'), 9000);
+  }
+  let preloadRun = 0;
+  async function preloadAround() {
+    const run = ++preloadRun;
+    if (!slides.length) return;
+    await Promise.all([0, 1, -1, 2, -2].map(d => resolveUrl(src(idx + d))));
+    for (const u of slides) { if (run !== preloadRun) return; await resolveUrl(u); }
+  }
+
+  let toastT;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  /* ================= CUBE ================= */
+  const cube = $('cube'), stage = $('stage'), wrapEl = $('stageWrap');
+  // Empat sisi kubus tetap di tempatnya. Kubus terus berputar (tanpa kembali ke 0),
+  // jadi gambar yang sedang terlihat tidak pernah diganti = tidak ada kedipan.
+  const faces = [];
+  for (let k = 0; k < 4; k++) {
+    const f = document.createElement('div'); f.className = 'face';
+    const im = document.createElement('img'); im.alt = ''; im.draggable = false;
+    const sh = document.createElement('div'); sh.className = 'shade';
+    f.append(im, sh); cube.appendChild(f);
+    faces.push({ el: f, img: im, shade: sh });
+  }
+  let rot = 0;   // sudut kubus saat ini (kelipatan 90)
+  const slot = off => faces[(((Math.round(-rot / 90) + off) % 4) + 4) % 4];
+
+  function setImg(face, url) {
+    const im = face.img;
+    if (im.getAttribute('data-u') === url) return Promise.resolve(resolved.get(url) || null);
+    return bindImg(im, url);
+  }
+
+  function setFaces() {
+    if (!slides.length) { stage.classList.add('is-empty'); return; }
+    stage.classList.remove('is-empty');
+    setImg(slot(0), src(idx));
+    setImg(slot(1), src(idx + 1));
+    setImg(slot(-1), src(idx - 1));
+    setImg(slot(2), src(idx + 2));
+  }
+
+  function layout() {
+    const r = wrapEl.getBoundingClientRect();
+    const pad = window.innerWidth <= 640 ? 8 : 16;
+    const k = settings.size / 100;
+    const aw = Math.max(120, (r.width - pad) * k);
+    const ah = Math.max(70, (r.height - pad - 22) * k);
+    const w = Math.floor(Math.min(aw, ah * 16 / 9));
+    const h = Math.floor(w * 9 / 16);
+    dims = { w, h };
+    stage.style.width = w + 'px';
+    stage.style.height = h + 'px';
+    // depth: 0 = perspective flat-ish, 40 = very dramatic
+    stage.style.perspective = Math.round(w * (3.4 - settings.depth / 18)) + 'px';
+    const z = w / 2;
+    faces.forEach((f, i) => {
+      f.el.style.width = w + 'px'; f.el.style.height = h + 'px';
+      f.el.style.transform = `rotateY(${90 * i}deg) translateZ(${z}px)`;
+    });
+    if (!busy) cube.style.transform = `translateZ(${-z}px) rotateY(${rot}deg)`;
+  }
+
+  async function go(dir, target) {
+    if (busy || slides.length < 2) return;
+    target = (target === undefined) ? wrap(idx + dir) : target;
+    if (target === idx) return;
+    busy = true;
+    setButtons();
+
+    const frontFace = slot(0);
+    const sideFace = slot(dir > 0 ? 1 : -1);
+    const loading = setImg(sideFace, src(target));
+    const slow = setTimeout(() => $('loader').classList.add('show'), 400);
+    await loading;
+    try { await sideFace.img.decode(); } catch (e) {}
+    clearTimeout(slow);
+    $('loader').classList.remove('show');
+
+    const { w } = dims, z = w / 2;
+    const angle = dir > 0 ? -90 : 90;            // NEXT = putar ke kiri, PREVIOUS = putar ke kanan
+    const pull = z + w * (0.12 + settings.depth / 160);
+    const dur = settings.duration;
+    const ease = 'cubic-bezier(.65,.02,.25,1)';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const opts = { duration: reduce ? 1 : dur, easing: ease, fill: 'forwards' };
+    const from = `translateZ(${-z}px) rotateY(${rot}deg)`;
+    const to = `translateZ(${-z}px) rotateY(${rot + angle}deg)`;
+    const cubeAnim = cube.animate([
+      { transform: from },
+      { transform: `translateZ(${-pull}px) rotateY(${rot + angle / 2}deg)`, offset: .5 },
+      { transform: to }
+    ], opts);
+    frontFace.shade.animate([{ opacity: 0 }, { opacity: .55 }], opts);
+    sideFace.shade.animate([{ opacity: .55 }, { opacity: 0 }], opts);
+    document.querySelector('.floor').animate([
+      { transform: 'scaleX(1)', opacity: 1 }, { transform: 'scaleX(.72)', opacity: .6, offset: .5 }, { transform: 'scaleX(1)', opacity: 1 }
+    ], { duration: reduce ? 1 : dur, easing: ease });
+
+    await cubeAnim.finished.catch(() => {});
+    // Kunci posisi akhir lebih dulu, baru lepas animasi: tampilan tidak berubah sama sekali.
+    rot += angle;
+    idx = target;
+    cube.style.transform = to;
+    cubeAnim.cancel();
+    frontFace.shade.getAnimations().forEach(a => a.cancel());
+    sideFace.shade.getAnimations().forEach(a => a.cancel());
+    setFaces();            // hanya mengisi sisi yang tidak terlihat
+    busy = false;
+    updateUI();
+    preloadAround();
+  }
+
+  const next = () => go(1);
+  const prev = () => go(-1);
+
+  function jump(i) {
+    if (i === idx) return;
+    go(i > idx ? 1 : -1, i);
+  }
+
+  /* ================= UI UPDATE ================= */
+  function setButtons() {
+    const off = busy || slides.length < 2;
+    $('prev').disabled = off; $('next').disabled = off;
+  }
+  function updateUI() {
+    const n = slides.length;
+    $('counter').textContent = n ? `${idx + 1} / ${n}` : '0 / 0';
+    setButtons();
+    document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+  }
+
+  function renderThumbs() {
+    const box = $('thumbs'); box.textContent = '';
+    slides.forEach((u, i) => {
+      const b = document.createElement('button'); b.className = 'thumb'; b.setAttribute('aria-label', 'Slide ' + (i + 1));
+      const im = document.createElement('img'); im.loading = 'lazy'; im.alt = ''; bindImg(im, u);
+      const s = document.createElement('span'); s.textContent = i + 1;
+      b.append(im, s);
+      b.addEventListener('click', () => { closeAll(); jump(i); });
+      box.appendChild(b);
+    });
+    $('drawerSub').textContent = slides.length + ' slide';
+  }
+
+  function renderAdminList() {
+    $('listCount').textContent = slides.length;
+    const box = $('slist'); box.textContent = '';
+    slides.forEach((u, i) => {
+      const row = document.createElement('div'); row.className = 'sitem';
+      const im = document.createElement('img'); im.loading = 'lazy'; im.alt = ''; bindImg(im, u);
+      const meta = document.createElement('div'); meta.className = 'meta';
+      const b = document.createElement('b'); b.textContent = 'Slide ' + (i + 1);
+      const sm = document.createElement('small'); sm.textContent = u; sm.title = u;
+      meta.append(b, sm);
+      const mk = (txt, label, fn, cls, dis) => {
+        const x = document.createElement('button'); x.className = 'mini ' + (cls || ''); x.textContent = txt;
+        x.setAttribute('aria-label', label); x.disabled = !!dis; x.addEventListener('click', fn); return x;
+      };
+      row.append(im, meta,
+        mk('✎', 'Ganti URL', () => editAt(i)),
+        mk('↑', 'Naikkan', () => move(i, -1), '', i === 0),
+        mk('↓', 'Turunkan', () => move(i, 1), '', i === slides.length - 1),
+        mk('✕', 'Hapus', () => removeAt(i), 'del', slides.length <= 1));
+      box.appendChild(row);
+    });
+  }
+
+  function refreshAll() {
+    if (idx >= slides.length) idx = slides.length - 1;
+    if (idx < 0) idx = 0;
+    save(); setFaces(); layout(); renderThumbs(); renderAdminList(); updateUI(); preloadAround();
+  }
+
+  /* ================= SLIDE EDITING ================= */
+  function addUrls(list) {
+    let added = 0, bad = 0;
+    list.forEach(raw => {
+      const u = norm(raw);
+      if (!u) return;
+      if (!valid(u)) { bad++; return; }
+      if (slides.includes(u)) return;
+      slides.push(u); added++;
+    });
+    refreshAll();
+    toast(added ? `${added} slide ditambahkan${bad ? `, ${bad} URL tidak valid` : ''}` : (bad ? 'URL tidak valid' : 'Tidak ada slide baru'));
+    return added;
+  }
+  function editAt(i) {
+    const raw = prompt(`Ganti URL gambar untuk slide ${i + 1}:`, slides[i]);
+    if (raw === null) return;
+    const u = norm(raw);
+    if (!u) return toast('URL kosong, tidak diubah');
+    if (!valid(u)) return toast('URL tidak valid');
+    if (u === slides[i]) return;
+    if (slides.includes(u)) return toast('URL itu sudah dipakai slide lain');
+    slides[i] = u;
+    refreshAll(); toast(`Slide ${i + 1} diganti`);
+  }
+  function removeAt(i) {
+    if (slides.length <= 1) return toast('Minimal harus ada 1 slide');
+    if (!confirm(`Hapus slide ${i + 1}?`)) return;
+    slides.splice(i, 1);
+    if (i < idx) idx--;
+    refreshAll(); toast('Slide dihapus');
+  }
+  function move(i, d) {
+    const j = i + d; if (j < 0 || j >= slides.length) return;
+    const cur = slides[idx];
+    [slides[i], slides[j]] = [slides[j], slides[i]];
+    idx = slides.indexOf(cur);
+    refreshAll();
+  }
+
+  /* ================= TIMER ================= */
+  let t0 = Date.now();
+  const pad2 = n => String(n).padStart(2, '0');
+  function tick() {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    $('timer').textContent = (h ? pad2(h) + ':' : '') + pad2(m) + ':' + pad2(ss);
+  }
+  setInterval(tick, 500);
+
+  /* ================= PANELS ================= */
+  const scrim = $('scrim');
+  function openDrawer() { closeAll(); $('drawer').classList.add('show'); scrim.classList.add('show'); $('burger').setAttribute('aria-expanded', 'true'); }
+  function openSheet() { closeAll(); renderAdminList(); $('sheet').classList.add('show'); scrim.classList.add('show'); }
+  function closeAll() {
+    $('drawer').classList.remove('show'); $('sheet').classList.remove('show'); scrim.classList.remove('show');
+    $('loginModal').classList.remove('show'); $('burger').setAttribute('aria-expanded', 'false');
+  }
+  function syncAdminUI() {
+    const b = $('adminToggle');
+    b.classList.toggle('on', loggedIn);
+    b.setAttribute('aria-pressed', String(loggedIn));
+    $('adminLabel').textContent = loggedIn ? 'ADMIN AKTIF' : 'LOGIN ADMIN';
+  }
+  function syncSettingsUI() {
+    $('durRange').value = settings.duration; $('durOut').textContent = (settings.duration / 1000).toFixed(2) + ' dtk';
+    $('sizeRange').value = settings.size; $('sizeOut').textContent = settings.size + '%';
+    $('depthRange').value = settings.depth; $('depthOut').textContent = settings.depth;
+  }
+
+  $('burger').addEventListener('click', openDrawer);
+  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeAll));
+  scrim.addEventListener('click', closeAll);
+
+  $('adminToggle').addEventListener('click', () => {
+    if (loggedIn) {
+      $('sheet').classList.contains('show') ? closeAll() : openSheet();
+    } else {
+      closeAll(); $('loginErr').textContent = ''; $('pass').value = '';
+      $('loginModal').classList.add('show'); scrim.classList.add('show');
+      setTimeout(() => $('user').focus(), 50);
+    }
+  });
+  function doLogin() {
+    if ($('user').value.trim() === ADMIN_USER && $('pass').value === ADMIN_PASS) {
+      loggedIn = true; try { sessionStorage.setItem(KEY + '.auth', '1'); } catch (e) {}
+      syncAdminUI(); toast('Login berhasil'); openSheet();
+    } else {
+      $('loginErr').textContent = 'Username atau password salah.';
+      $('pass').select();
+    }
+  }
+  $('loginOk').addEventListener('click', doLogin);
+  $('loginCancel').addEventListener('click', closeAll);
+  ['user', 'pass'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+  $('logoutBtn').addEventListener('click', () => {
+    loggedIn = false; try { sessionStorage.removeItem(KEY + '.auth'); } catch (e) {}
+    syncAdminUI(); closeAll(); toast('Anda telah keluar');
+  });
+
+  // Settings
+  $('durRange').addEventListener('input', e => { settings.duration = +e.target.value; syncSettingsUI(); save(); });
+  $('sizeRange').addEventListener('input', e => { settings.size = +e.target.value; syncSettingsUI(); save(); layout(); });
+  $('depthRange').addEventListener('input', e => { settings.depth = +e.target.value; syncSettingsUI(); save(); layout(); });
+  $('resetSettings').addEventListener('click', () => { settings = { ...DEFAULT_SETTINGS }; syncSettingsUI(); save(); layout(); toast('Pengaturan dikembalikan'); });
+
+  // Add slides
+  $('addOneBtn').addEventListener('click', () => { if (addUrls([$('addOne').value])) $('addOne').value = ''; });
+  $('addOne').addEventListener('keydown', e => { if (e.key === 'Enter') $('addOneBtn').click(); });
+  $('addManyBtn').addEventListener('click', () => {
+    const list = $('addMany').value.split(/\s+/).filter(Boolean);
+    if (!list.length) return toast('Isi daftar URL terlebih dulu');
+    if (addUrls(list)) $('addMany').value = '';
+  });
+  $('genBtn').addEventListener('click', () => {
+    let base = $('genBase').value.trim(); if (base && !base.endsWith('/')) base += '/';
+    const a = parseInt($('genFrom').value, 10), b = parseInt($('genTo').value, 10);
+    const ext = $('genExt').value.trim().replace(/^\./, '') || 'png';
+    if (!base || isNaN(a) || isNaN(b) || b < a) return toast('Periksa folder dasar dan rentang nomor');
+    const list = []; for (let n = a; n <= b; n++) list.push(`${base}${n}.${ext}`);
+    addUrls(list);
+  });
+  $('resetSlides').addEventListener('click', () => {
+    if (!confirm('Kembalikan ke daftar slide awal?')) return;
+    slides = [...baseSlides]; idx = 0; refreshAll(); toast('Daftar slide dikembalikan');
+  });
+  $('downloadBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ version: Date.now(), slides, settings }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'slides.json';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    toast('slides.json diunduh. Unggah ke GitHub bersama index.html');
+  });
+  $('clearLocalBtn').addEventListener('click', () => {
+    if (!confirm('Hapus perubahan di browser ini dan kembali ke daftar bawaan (slides.json atau bawaan kode)?')) return;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    hasLocal = false; slides = [...baseSlides]; settings = { ...baseSettings }; idx = 0;
+    setFaces(); layout(); renderThumbs(); renderAdminList(); syncSettingsUI(); updateUI(); preloadAround();
+    toast('Kembali ke daftar bawaan');
+  });
+  $('exportBtn').addEventListener('click', async () => {
+    const txt = JSON.stringify(slides, null, 2);
+    try { await navigator.clipboard.writeText(txt); toast('Daftar URL disalin'); }
+    catch (e) { prompt('Salin daftar URL:', txt); }
+  });
+
+  // Drawer actions
+  $('resetTimerBtn').addEventListener('click', () => { t0 = Date.now(); tick(); toast('Timer diulang'); });
+  function toggleFS() {
+    const d = document.documentElement;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      (d.requestFullscreen || d.webkitRequestFullscreen || (() => toast('Layar penuh tidak didukung')))?.call(d);
+    } else { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+  }
+  $('fsBtn').addEventListener('click', () => { closeAll(); toggleFS(); });
+
+  /* ================= INPUT ================= */
+  $('next').addEventListener('click', next);
+  $('prev').addEventListener('click', prev);
+
+  document.addEventListener('keydown', e => {
+    if (/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { if (e.key === 'Escape') closeAll(); return; }
+    switch (e.key) {
+      case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(); break;
+      case 'f': case 'F': toggleFS(); break;
+      case 'Escape': closeAll(); break;
+    }
+  });
+
+  // Swipe
+  let sx = 0, sy = 0, tracking = false;
+  stage.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; tracking = true; });
+  window.addEventListener('pointerup', e => {
+    if (!tracking) return; tracking = false;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) dx < 0 ? next() : prev();
+  });
+  window.addEventListener('pointercancel', () => { tracking = false; });
+
+  new ResizeObserver(layout).observe(wrapEl);
+  window.addEventListener('orientationchange', () => setTimeout(layout, 200));
+
+  /* ================= INIT ================= */
+  async function loadRemote() {
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 4000);
+      const r = await fetch('slides.json?_=' + Date.now(), { cache: 'no-store', signal: ctl.signal });
+      clearTimeout(t);
+      if (!r.ok) return null;
+      const j = await r.json();
+      const list = Array.isArray(j) ? j : j.slides;
+      if (!Array.isArray(list)) return null;
+      const clean = list.map(x => norm(String(x))).filter(u => u && valid(u));
+      if (!clean.length) return null;
+      return { slides: clean, settings: (j.settings && typeof j.settings === 'object') ? j.settings : null, version: Number(j.version) || 1 };
+    } catch (e) { return null; }
+  }
+
+  // Urutan prioritas: slides.json terbaru > perubahan lokal (hanya jika dibuat dari slides.json yang sama) > bawaan kode
+  async function boot() {
+    layout(); tick();
+    $('loader').classList.add('show');
+    const remote = await loadRemote();
+    if (remote) {
+      remoteVersion = remote.version;
+      baseSlides = [...remote.slides];
+      baseSettings = { ...DEFAULT_SETTINGS, ...(remote.settings || {}) };
+    }
+    if (localData && (!remote || (Number(localData.baseVersion) || 0) >= remote.version)) {
+      slides = [...localData.slides];
+      settings = { ...DEFAULT_SETTINGS, ...(localData.settings || {}) };
+      hasLocal = true;
+    } else {
+      slides = [...baseSlides];
+      settings = { ...baseSettings };
+      hasLocal = false;
+      if (localData) { try { localStorage.removeItem(KEY); } catch (e) {} }
+    }
+    if (settings.size === 92) settings.size = 100;
+    $('loader').classList.remove('show');
+    syncAdminUI(); syncSettingsUI(); setFaces(); layout(); renderThumbs(); renderAdminList(); updateUI();
+    preloadAround();
+    window.__ready = true;
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
